@@ -1,0 +1,2568 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vis Artistik v28</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --accent: #8b5cf6;
+            --accent-hover: #7c3aed;
+            --text: #f8fafc;
+            --success: #10b981;
+            --danger: #ef4444;
+            --gold: #fbbf24;
+            --info: #3b82f6;
+            --sky-transition: 3s ease-in-out;
+            --header-gradient: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        }
+        body.day-mode {
+            --bg: #bae6fd;
+            --card: #f1f5f9;
+            --text: #0f172a;
+            --accent: #3b82f6;
+            --header-gradient: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+        }
+        body.storm-mode {
+            --bg: #0c0f1a;
+        }
+        body.day-mode.storm-mode {
+            --bg: #4b5563;
+            --card: #d1d5db;
+        }
+        html, body {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow-x: hidden; position: fixed;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg); color: var(--text);
+            transition: background var(--sky-transition), color var(--sky-transition);
+        }
+
+        #toastContainer {
+            position: fixed; top: 15px; right: 15px; z-index: 10000;
+            display: flex; flex-direction: column; gap: 8px;
+            pointer-events: none; width: 320px; max-width: 90vw;
+        }
+        .toast {
+            background: var(--card); border-radius: 16px; padding: 14px 18px;
+            display: flex; align-items: center; gap: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transform: translateX(120%); opacity: 0;
+            animation: toastIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
+            pointer-events: auto; position: relative; overflow: hidden;
+        }
+        .toast.removing { animation: toastOut 0.3s ease-in forwards; }
+        .toast-icon { font-size: 24px; flex-shrink: 0; }
+        .toast-body { flex: 1; }
+        .toast-title { font-size: 12px; font-weight: 800; margin-bottom: 2px; }
+        .toast-msg { font-size: 11px; opacity: 0.8; line-height: 1.3; }
+        .toast-progress {
+            position: absolute; bottom: 0; left: 0; height: 3px;
+            border-radius: 0 0 16px 16px;
+            animation: toastProgress 3s linear forwards;
+        }
+        .toast.toast-success .toast-progress { background: var(--success); }
+        .toast.toast-error .toast-progress { background: var(--danger); }
+        .toast.toast-info .toast-progress { background: var(--info); }
+        .toast.toast-gold .toast-progress { background: var(--gold); }
+        .toast.toast-success { border-left: 4px solid var(--success); }
+        .toast.toast-error { border-left: 4px solid var(--danger); }
+        .toast.toast-info { border-left: 4px solid var(--info); }
+        .toast.toast-gold { border-left: 4px solid var(--gold); }
+
+        @keyframes toastIn { 0%{transform:translateX(120%);opacity:0;} 100%{transform:translateX(0);opacity:1;} }
+        @keyframes toastOut { 0%{transform:translateX(0);opacity:1;} 100%{transform:translateX(120%);opacity:0;} }
+        @keyframes toastProgress { 0%{width:100%;} 100%{width:0%;} }
+
+        #tutorialOverlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            z-index: 9990; display: none; pointer-events: none;
+        }
+        .tutorial-focus {
+            position: relative !important; z-index: 9991 !important;
+            box-shadow: 0 0 0 9999px rgba(0,0,0,0.4), 0 0 30px var(--accent) !important;
+            pointer-events: auto !important; transition: all 0.3s ease;
+        }
+
+        .sky-effect {
+            position: fixed; inset: 0; pointer-events: none;
+            z-index: -1; overflow: hidden;
+        }
+        #stormOverlay {
+            position: fixed; inset: 0; pointer-events: none; z-index: 0;
+            opacity: 0; transition: opacity 3s ease;
+        }
+        #stormOverlay.active { opacity: 1; }
+        .storm-clouds {
+            position: absolute; width: 100%; height: 40%;
+            top: 0; left: 0;
+            background: linear-gradient(180deg,
+                rgba(20,20,35,0.98) 0%,
+                rgba(35,35,55,0.9) 30%,
+                rgba(50,50,70,0.7) 60%,
+                transparent 100%);
+        }
+        body.day-mode .storm-clouds {
+            background: linear-gradient(180deg,
+                rgba(75,85,99,0.98) 0%,
+                rgba(107,114,128,0.85) 30%,
+                rgba(156,163,175,0.5) 60%,
+                transparent 100%);
+        }
+        .cloud-layer {
+            position: absolute; width: 200%; height: 100px;
+            top: 0; left: -50%;
+            filter: blur(30px); opacity: 0.8;
+        }
+        .cloud-layer-1 {
+            background: radial-gradient(ellipse 300px 80px at 20% 50%, rgba(40,40,65,0.9) 0%, transparent 70%),
+                        radial-gradient(ellipse 250px 70px at 50% 40%, rgba(50,50,75,0.8) 0%, transparent 70%),
+                        radial-gradient(ellipse 350px 90px at 80% 60%, rgba(35,35,60,0.9) 0%, transparent 70%);
+            animation: cloudMove1 40s linear infinite;
+        }
+        .cloud-layer-2 {
+            top: 30px;
+            background: radial-gradient(ellipse 280px 75px at 30% 50%, rgba(45,45,70,0.85) 0%, transparent 70%),
+                        radial-gradient(ellipse 320px 85px at 70% 45%, rgba(40,40,65,0.8) 0%, transparent 70%);
+            animation: cloudMove2 55s linear infinite;
+        }
+        body.day-mode .cloud-layer-1 {
+            background: radial-gradient(ellipse 300px 80px at 20% 50%, rgba(120,120,140,0.9) 0%, transparent 70%),
+                        radial-gradient(ellipse 250px 70px at 50% 40%, rgba(140,140,160,0.8) 0%, transparent 70%),
+                        radial-gradient(ellipse 350px 90px at 80% 60%, rgba(110,110,130,0.9) 0%, transparent 70%);
+        }
+        body.day-mode .cloud-layer-2 {
+            background: radial-gradient(ellipse 280px 75px at 30% 50%, rgba(130,130,150,0.85) 0%, transparent 70%),
+                        radial-gradient(ellipse 320px 85px at 70% 45%, rgba(125,125,145,0.8) 0%, transparent 70%);
+        }
+        @keyframes cloudMove1 { 0%{transform:translateX(0);} 100%{transform:translateX(-25%);} }
+        @keyframes cloudMove2 { 0%{transform:translateX(0);} 100%{transform:translateX(20%);} }
+
+        .storm-fog {
+            position: absolute; bottom: 0; width: 100%; height: 30%;
+            background: linear-gradient(0deg,
+                rgba(30,30,50,0.3) 0%,
+                transparent 100%);
+        }
+        body.day-mode .storm-fog {
+            background: linear-gradient(0deg, rgba(107,114,128,0.25) 0%, transparent 100%);
+        }
+
+        #rainCanvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 2; opacity: 0; transition: opacity 2s;
+        }
+        #rainCanvas.active { opacity: 0.8; }
+        #lightning {
+            position: fixed; inset: 0; background: white;
+            opacity: 0; z-index: 100; pointer-events: none;
+        }
+        .sun-moon {
+            position: absolute; width: 80px; height: 80px; border-radius: 50%;
+            top: 50px; right: 50px;
+            transition: all 3s cubic-bezier(0.4,0,0.2,1);
+        }
+        body.day-mode .sun-moon { background: #fde047; box-shadow: 0 0 50px #fbbf24; transform: translateY(0); }
+        body:not(.day-mode) .sun-moon { background: #f1f5f9; box-shadow: 0 0 30px #cbd5e1; transform: translateY(20px); }
+        body.storm-mode .sun-moon { opacity: 0.05 !important; filter: blur(5px); }
+        .stars {
+            position: absolute; width: 100%; height: 100%;
+            background-image: radial-gradient(2px 2px at 20px 30px,#eee,rgba(0,0,0,0)),
+                              radial-gradient(2px 2px at 40px 70px,#fff,rgba(0,0,0,0)),
+                              radial-gradient(2px 2px at 50px 160px,#ddd,rgba(0,0,0,0));
+            background-repeat: repeat; background-size: 200px 200px;
+            opacity: 0; transition: opacity 2s;
+        }
+        body:not(.day-mode) .stars { opacity: 0.3; }
+        body.storm-mode .stars { opacity: 0 !important; }
+
+        .main-container {
+            width: 100%; height: 100%; overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            display: flex; flex-direction: column; align-items: center;
+            position: relative; z-index: 1;
+        }
+
+        #splash-screen {
+            position: fixed; inset: 0; background: #0f172a;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 9999; transition: opacity 1s ease, visibility 1s;
+        }
+        .splash-content { text-align: center; animation: splashZoom 2.5s ease-out forwards; }
+        .splash-title {
+            font-size: 38px; font-weight: 800;
+            background: linear-gradient(135deg,#fff 30%,var(--accent));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 5px; letter-spacing: -1px;
+        }
+        .splash-dev { font-size: 12px; color: #64748b; letter-spacing: 4px; text-transform: uppercase; }
+        @keyframes splashZoom {
+            0%{opacity:0;transform:scale(0.8);} 20%{opacity:1;transform:scale(1);}
+            80%{opacity:1;transform:scale(1.05);} 100%{opacity:0;transform:scale(1.1);}
+        }
+
+        #register, #game { opacity: 0; width: 100%; max-width: 500px; box-sizing: border-box; }
+        .content-visible { opacity: 1 !important; transition: opacity 0.8s ease; }
+        #register { height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .register-box {
+            background: var(--card); padding: 30px; width: 85%; border-radius: 24px;
+            text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: background var(--sky-transition);
+        }
+        .register-box h2 { margin-bottom: 24px; font-size: 24px; }
+        .register-box input {
+            width: 100%; padding: 14px; border: 2px solid #334155;
+            border-radius: 12px; background: rgba(15,23,42,0.5);
+            color: var(--text); box-sizing: border-box; margin-bottom: 15px; outline: none;
+        }
+        .register-box button {
+            width: 100%; padding: 14px; border: none; border-radius: 12px;
+            background: linear-gradient(135deg,var(--accent),#3b82f6);
+            color: #fff; font-weight: bold; cursor: pointer;
+        }
+
+        #game { display: none; padding: 15px; }
+
+        .header {
+            background: var(--header-gradient); padding: 0; border-radius: 24px;
+            display: flex; flex-direction: column;
+            margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+            transition: all var(--sky-transition);
+            position: relative; overflow: hidden; min-height: 130px;
+        }
+        #bannerImage {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            object-fit: cover; z-index: 0; opacity: 0;
+            transition: opacity 1.2s ease-in-out;
+        }
+        #bannerImage.active { opacity: 1; }
+        #bannerImage2 {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            object-fit: cover; z-index: 0; opacity: 0;
+            transition: opacity 1.2s ease-in-out;
+        }
+        #bannerImage2.active { opacity: 1; }
+        .banner-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to bottom,rgba(0,0,0,0.05) 0%,rgba(0,0,0,0.7) 100%);
+            z-index: 1; display: none;
+        }
+        .header.has-banner .banner-overlay { display: block; }
+        .header-content {
+            position: relative; z-index: 2; width: 100%;
+            display: flex; flex-direction: column; height: 100%;
+            min-height: 130px;
+        }
+
+        .header-top {
+            display: flex; align-items: center; gap: 12px;
+            padding: 16px 18px 8px 18px; flex: 1;
+        }
+
+        .profile-pic-wrapper {
+            position: relative; flex-shrink: 0; cursor: pointer;
+        }
+        .profile-pic {
+            width: 56px; height: 56px; border-radius: 50%;
+            object-fit: cover; border: 3px solid rgba(255,255,255,0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: rgba(255,255,255,0.1);
+            transition: transform 0.2s, border-color 0.3s;
+        }
+        .profile-pic:hover { transform: scale(1.05); border-color: var(--accent); }
+        .profile-pic-edit {
+            position: absolute; bottom: -2px; right: -2px;
+            width: 20px; height: 20px; border-radius: 50%;
+            background: var(--accent); display: flex; align-items: center; justify-content: center;
+            font-size: 10px; border: 2px solid var(--card);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .profile-pic-edit.hidden { opacity: 0; transform: scale(0); pointer-events: none; }
+        #profileInput { display: none; }
+
+        .shop-text-content { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+        #shopTitle {
+            font-weight: 900; font-size: 20px; letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff 0%, #e2e8f0 50%, #f8fafc 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+            line-height: 1.1;
+        }
+        body.day-mode #shopTitle {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            -webkit-background-clip: text;
+        }
+        .header.has-banner #shopTitle {
+            background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 50%, #e2e8f0 100%) !important;
+            -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6)) !important;
+        }
+        .shop-sub {
+            font-size: 9px; text-transform: uppercase; letter-spacing: 2px;
+            opacity: 0.9; font-weight: 700; color: #94a3b8;
+        }
+        body.day-mode .shop-sub { color: #64748b; }
+        .header.has-banner .shop-sub { color: rgba(255,255,255,0.85) !important; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+        .time-status {
+            font-size: 10px; font-weight: 800; text-transform: uppercase;
+            padding: 3px 10px; border-radius: 20px;
+            background: rgba(0,0,0,0.4); letter-spacing: 0.5px; color: #fff !important;
+            align-self: flex-start; flex-shrink: 0;
+        }
+
+        .header-bottom {
+            display: flex; align-items: center; gap: 8px;
+            padding: 6px 18px 14px 18px;
+        }
+        .balance {
+            background: rgba(15,23,42,0.8); backdrop-filter: blur(4px);
+            padding: 7px 14px; border-radius: 13px; font-weight: 800; font-size: 13px;
+            color: #22d3ee; border: 1px solid rgba(34,211,238,0.3);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+        .balance.pop { animation: balancePop 0.3s ease; }
+        @keyframes balancePop { 0%{transform:scale(1);} 50%{transform:scale(1.15);} 100%{transform:scale(1);} }
+
+        .badge-display {
+            background: rgba(15,23,42,0.6); backdrop-filter: blur(4px);
+            padding: 5px 12px; border-radius: 13px;
+            font-size: 20px; display: flex; align-items: center; justify-content: center;
+            border: 1px solid rgba(251,191,36,0.3);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+        }
+        .badge-display.upgraded { animation: badgeBounce 0.6s cubic-bezier(0.175,0.885,0.32,1.275); }
+        @keyframes badgeBounce { 0%{transform:scale(1);} 40%{transform:scale(1.4) rotate(10deg);} 70%{transform:scale(0.9) rotate(-5deg);} 100%{transform:scale(1) rotate(0);} }
+
+        .stats-panel {
+            background: var(--card); padding: 15px; border-radius: 20px;
+            margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.08);
+            transition: background var(--sky-transition);
+        }
+        .stats-header {
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; user-select: none;
+        }
+        .stats-header h3 { margin: 0; font-size: 14px; }
+        .stats-toggle { font-size: 18px; transition: transform 0.3s; }
+        .stats-toggle.open { transform: rotate(180deg); }
+        .stats-body {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1), padding 0.3s;
+            padding-top: 0;
+        }
+        .stats-body.open { max-height: 800px; padding-top: 12px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
+        .stat-card {
+            background: rgba(15,23,42,0.3); padding: 12px; border-radius: 14px;
+            text-align: center; border: 1px solid rgba(51,65,85,0.3);
+        }
+        .stat-value { font-size: 20px; font-weight: 800; color: var(--accent); display: block; margin-bottom: 2px; }
+        .stat-label { font-size: 10px; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .chart-section { margin-top: 12px; }
+        .chart-tabs { display: flex; gap: 6px; margin-bottom: 8px; }
+        .chart-tab-btn {
+            padding: 5px 14px; border-radius: 10px; font-size: 10px; font-weight: 700;
+            cursor: pointer; border: 1px solid rgba(51,65,85,0.5); background: rgba(15,23,42,0.3);
+            color: var(--text); opacity: 0.6; transition: all 0.2s;
+        }
+        .chart-tab-btn.active { opacity: 1; background: var(--accent); border-color: var(--accent); }
+        .chart-box {
+            background: rgba(15,23,42,0.3); border-radius: 14px; padding: 12px;
+            border: 1px solid rgba(51,65,85,0.3); position: relative; height: 160px;
+        }
+        .chart-box canvas { width: 100% !important; height: 100% !important; display: block; background: transparent !important; cursor: default !important; }
+
+        .quest-panel {
+            background: var(--card); padding: 15px; border-radius: 20px;
+            margin-bottom: 15px; border: 1px solid rgba(251,191,36,0.3);
+            transition: background var(--sky-transition);
+        }
+        .quest-panel h3 { margin: 0 0 12px; font-size: 14px; color: var(--gold); }
+        .quest-item {
+            background: rgba(15,23,42,0.3); padding: 12px; border-radius: 14px;
+            margin-bottom: 8px; border: 1px solid rgba(51,65,85,0.3);
+            display: flex; align-items: center; gap: 12px;
+            transition: all 0.3s ease;
+        }
+        .quest-item.completed { border-color: var(--success); background: rgba(16,185,129,0.1); }
+        .quest-icon { font-size: 24px; flex-shrink: 0; }
+        .quest-info { flex: 1; }
+        .quest-name { font-size: 12px; font-weight: 700; margin-bottom: 3px; }
+        .quest-desc { font-size: 10px; opacity: 0.6; margin-bottom: 6px; }
+        .quest-progress-bar {
+            width: 100%; height: 6px; background: rgba(51,65,85,0.5);
+            border-radius: 3px; overflow: hidden;
+        }
+        .quest-progress-fill {
+            height: 100%; border-radius: 3px; transition: width 0.5s ease;
+            background: linear-gradient(90deg, var(--accent), var(--gold));
+        }
+        .quest-reward {
+            font-size: 10px; font-weight: 800; color: var(--gold);
+            background: rgba(251,191,36,0.15); padding: 4px 10px;
+            border-radius: 8px; white-space: nowrap;
+        }
+        .quest-claim-btn {
+            background: var(--success); color: #fff; border: none;
+            padding: 6px 14px; border-radius: 8px; font-size: 10px;
+            font-weight: 700; cursor: pointer;
+            animation: claimPulse 1.5s infinite;
+        }
+        @keyframes claimPulse { 0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,0.5);} 50%{box-shadow:0 0 0 6px rgba(16,185,129,0);} }
+
+        .shop-container {
+            background: var(--card); padding: 0; border-radius: 20px;
+            margin-bottom: 15px; border: 1px solid var(--gold);
+            transition: background var(--sky-transition); overflow: hidden;
+        }
+        .shop-tabs {
+            display: flex; border-bottom: 2px solid rgba(51,65,85,0.3);
+            background: rgba(0,0,0,0.15);
+        }
+        .shop-tab {
+            flex: 1; padding: 12px 8px; text-align: center;
+            font-size: 11px; font-weight: 700; cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease; opacity: 0.6;
+            background: none; border-top: none; border-left: none; border-right: none;
+            color: var(--text);
+        }
+        .shop-tab.active { opacity: 1; border-bottom-color: var(--gold); background: rgba(251,191,36,0.08); }
+        .shop-tab-icon { display: block; font-size: 18px; margin-bottom: 3px; }
+        .shop-tab-content { display: none; padding: 12px; }
+        .shop-tab-content.active { display: block; animation: fadeInTab 0.3s ease; }
+        @keyframes fadeInTab { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+        .shop-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+        .banner-shop-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
+        .shop-item {
+            background: rgba(15,23,42,0.3); padding: 10px 8px; border-radius: 12px;
+            text-align: center; font-size: 10px;
+            border: 1px solid rgba(51,65,85,0.5);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .shop-item:active { transform: scale(0.97); }
+        .shop-item b { display: block; color: var(--gold); margin-bottom: 4px; font-size: 11px; }
+        .shop-item .stock { display: block; font-size: 11px; color: var(--success); font-weight: bold; margin-bottom: 4px; }
+        .shop-item span { display: block; font-size: 9px; opacity: 0.7; margin-bottom: 6px; }
+        .shop-item .item-icon { font-size: 28px; display: block; margin-bottom: 5px; }
+
+        .gift-float {
+            position: fixed; bottom: 30px; right: 20px;
+            width: 60px; height: 60px; background: #ef4444; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 30px; cursor: pointer; z-index: 1000;
+            box-shadow: 0 0 20px rgba(239,68,68,0.5);
+            animation: giftPulse 2s infinite; border: 3px solid #fff;
+        }
+        .settings-float {
+            position: fixed; bottom: 30px; left: 20px;
+            width: 50px; height: 50px; background: var(--card); border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; cursor: pointer; z-index: 1000;
+            border: 2px solid var(--accent);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4); color: var(--text);
+        }
+        .message-float {
+            position: fixed; bottom: 30px; left: 80px;
+            width: 50px; height: 50px; background: var(--card); border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; cursor: pointer; z-index: 1000;
+            border: 2px solid #f472b6;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4); color: var(--text);
+        }
+        .msg-badge-count {
+            position: absolute; top: -6px; right: -6px;
+            background: var(--danger); color: #fff; font-size: 10px; font-weight: 800;
+            min-width: 18px; height: 18px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid var(--card);
+        }
+        .msg-badge-count.hidden { display: none; }
+
+        @keyframes giftPulse {
+            0%{transform:scale(1);box-shadow:0 0 0 0 rgba(239,68,68,0.7);}
+            70%{transform:scale(1.1);box-shadow:0 0 0 15px rgba(239,68,68,0);}
+            100%{transform:scale(1);box-shadow:0 0 0 0 rgba(239,68,68,0);}
+        }
+
+        #canvasWrap {
+            background: #1a1a2e; border-radius: 20px; overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+            width: 100%; height: 420px;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        #canvasWrapBanner {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            object-fit: cover; z-index: 0; opacity: 0;
+            transition: opacity 1s ease;
+            filter: blur(3px) brightness(0.4);
+        }
+        #canvasWrapBanner.active { opacity: 1; }
+        .canvas-placeholder {
+            position: absolute; inset: 0; z-index: 0;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            opacity: 1; transition: opacity 0.5s ease;
+        }
+        .canvas-placeholder.hidden { opacity: 0; pointer-events: none; }
+        .canvas-placeholder-icon { font-size: 48px; margin-bottom: 8px; opacity: 0.3; }
+        .canvas-placeholder-text { font-size: 12px; opacity: 0.25; text-transform: uppercase; letter-spacing: 2px; }
+
+        canvas#canvas { background: #ffffff; cursor: crosshair; touch-action: none; transition: transform 0.3s ease; position: relative; z-index: 1; }
+        .no-canvas-msg {
+            text-align: center; color: #94a3b8; padding: 20px;
+            position: relative; z-index: 1;
+        }
+        .no-canvas-msg .msg-icon { font-size: 40px; display: block; margin-bottom: 8px; }
+        .no-canvas-msg .msg-text { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+        .no-canvas-msg .msg-sub { font-size: 11px; opacity: 0.6; }
+        .canvas-selector {
+            display: flex; gap: 10px; margin-bottom: 10px;
+            overflow-x: auto; padding: 5px;
+        }
+
+        #visitorNotif {
+            position: fixed; top: 15px; left: 50%;
+            transform: translateX(-50%) translateY(-150%);
+            width: 90%; max-width: 400px;
+            background: var(--card); padding: 15px; border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border: 2px solid var(--accent); z-index: 1000;
+            transition: transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        #visitorNotif.show { transform: translateX(-50%) translateY(0); }
+
+        #rewardModal, #settingsModal, #messageModal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+            display: none; justify-content: center; align-items: center; z-index: 5000;
+        }
+        .reward-box, .settings-box {
+            background: var(--card); padding: 30px; border-radius: 30px;
+            text-align: center; border: 3px solid var(--accent);
+            animation: rewardPop 0.5s cubic-bezier(0.175,0.885,0.32,1.275);
+            max-width: 80%; width: 300px;
+        }
+        @keyframes rewardPop { 0%{transform:scale(0.5);opacity:0;} 100%{transform:scale(1);opacity:1;} }
+        .gift-anim { font-size: 80px; margin-bottom: 10px; display: block; }
+
+        .message-modal-box {
+            background: var(--card); border-radius: 24px; width: 90%; max-width: 380px;
+            max-height: 80vh; overflow: hidden; border: 2px solid #f472b6;
+            animation: rewardPop 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+            display: flex; flex-direction: column;
+        }
+        .message-modal-header {
+            background: linear-gradient(135deg, #ec4899, #f472b6);
+            padding: 16px 20px; display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+        }
+        .message-modal-header span:first-child { font-size: 24px; }
+        .message-modal-header h3 { margin: 0; font-size: 16px; color: #fff; font-weight: 800; }
+        .message-list { flex: 1; overflow-y: auto; padding: 10px; }
+        .message-item {
+            background: rgba(15,23,42,0.3); border-radius: 16px; padding: 14px;
+            margin-bottom: 8px; border: 1px solid rgba(51,65,85,0.3);
+        }
+        .message-item.unread { border-left: 4px solid #f472b6; }
+        .message-item.responded { opacity: 0.5; }
+        .mi-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .mi-avatar { font-size: 32px; }
+        .mi-info { flex: 1; }
+        .mi-name { font-size: 12px; font-weight: 800; }
+        .mi-role { font-size: 9px; opacity: 0.5; text-transform: uppercase; letter-spacing: 1px; }
+        .mi-time { font-size: 9px; opacity: 0.4; }
+        .mi-body { font-size: 12px; line-height: 1.5; margin-bottom: 10px; opacity: 0.85; }
+        .mi-offer {
+            background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.3);
+            padding: 10px 14px; border-radius: 12px; margin-bottom: 10px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .mi-offer-price { font-size: 18px; font-weight: 800; color: var(--gold); }
+        .mi-offer-label { font-size: 9px; opacity: 0.5; }
+        .mi-painting { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; border: 2px solid rgba(255,255,255,0.1); background: #fff; }
+        .mi-actions { display: flex; gap: 8px; }
+        .mi-actions button {
+            flex: 1; padding: 8px; border: none; border-radius: 10px;
+            font-size: 11px; font-weight: 700; cursor: pointer; color: #fff;
+        }
+        .mi-actions button:active { transform: scale(0.96); }
+        .mi-status { text-align: center; font-size: 11px; font-weight: 700; opacity: 0.6; padding: 4px; }
+        .message-empty { text-align: center; padding: 50px 20px; opacity: 0.35; }
+        .message-empty span { font-size: 48px; display: block; margin-bottom: 8px; }
+
+        .thrown-fruit {
+            position: fixed; font-size: 50px; z-index: 9500; pointer-events: none;
+            transition: none;
+        }
+
+        #reputationNotif {
+            position: fixed; top: 20px; left: 50%;
+            transform: translateX(-50%) scale(0.5);
+            width: 85%; max-width: 400px;
+            background: linear-gradient(135deg,var(--card),var(--bg));
+            padding: 20px; border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6), 0 0 20px var(--gold);
+            border: 2px solid var(--gold); z-index: 3000;
+            text-align: center; opacity: 0; visibility: hidden;
+            transition: all 0.5s cubic-bezier(0.175,0.885,0.32,1.275);
+        }
+        #reputationNotif.active { opacity: 1; visibility: visible; transform: translateX(-50%) scale(1); }
+        .close-notif {
+            position: absolute; top: 10px; right: 15px;
+            font-size: 20px; cursor: pointer; color: #64748b; font-weight: bold;
+        }
+
+        #tutorialPopup {
+            position: fixed; bottom: 20px; left: 50%;
+            transform: translateX(-50%) translateY(200%);
+            width: 90%; max-width: 400px;
+            background: var(--card); border: 2px solid var(--accent);
+            border-radius: 20px; padding: 20px; z-index: 9999;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+            transition: transform 0.5s cubic-bezier(0.175,0.885,0.32,1.275);
+        }
+        #tutorialPopup.active { transform: translateX(-50%) translateY(0); }
+        .tutorial-text { font-size: 14px; line-height: 1.5; margin-bottom: 15px; }
+
+        .tools {
+            background: var(--card); padding: 12px; border-radius: 20px;
+            margin-top: 15px; display: flex; flex-wrap: wrap; gap: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: background var(--sky-transition);
+        }
+        .tool-row { display: flex; width: 100%; gap: 10px; align-items: center; }
+        .label-tool { font-size: 11px; font-weight: 600; min-width: 70px; color: #64748b; }
+        .brush-list {
+            display: flex; gap: 8px; overflow-x: auto; width: 100%; padding: 5px 0;
+            scrollbar-width: none;
+        }
+        .brush-list::-webkit-scrollbar { display: none; }
+        .brush-item {
+            flex: 0 0 55px; height: 55px; background: rgba(51,65,85,0.5);
+            border-radius: 12px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            cursor: pointer; border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .brush-item.active { border-color: var(--accent); background: rgba(71,85,105,0.8); transform: scale(1.05); }
+        .brush-name { font-size: 7px; margin-top: 2px; color: var(--text); font-weight: bold; }
+        input[type="color"] {
+            -webkit-appearance: none; border: none; width: 40px; height: 40px;
+            border-radius: 10px; background: none; padding: 0; cursor: pointer;
+        }
+        input[type="range"] { flex: 1; accent-color: var(--accent); }
+        #sizeDisplay {
+            font-size: 12px; font-weight: 800; color: var(--accent);
+            min-width: 25px; text-align: center;
+            background: rgba(0,0,0,0.2); padding: 2px 5px; border-radius: 5px;
+        }
+        .btn-small {
+            background: #334155; border: none; padding: 8px 12px; border-radius: 10px;
+            color: #fff; font-size: 12px; font-weight: 600; cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+        .btn-small:active { transform: scale(0.95); }
+
+        .palette {
+            display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; width: 100%; margin-top: 10px;
+            padding: 8px; border-radius: 12px;
+            transition: all 0.5s ease;
+            background: transparent; border: 2px solid transparent;
+        }
+        .palette.gold-mode {
+            background: linear-gradient(135deg, rgba(251,191,36,0.15) 0%, rgba(245,158,11,0.08) 50%, rgba(251,191,36,0.15) 100%);
+            border: 2px solid rgba(251,191,36,0.4);
+            box-shadow: 0 0 20px rgba(251,191,36,0.1), inset 0 0 15px rgba(251,191,36,0.05);
+        }
+        .palette.gold-mode::before {
+            content: '✨ Gold Palette ✨'; display: block; grid-column: 1 / -1;
+            text-align: center; font-size: 9px; font-weight: 800; color: var(--gold);
+            letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px;
+        }
+        .color-btn {
+            aspect-ratio: 1/1; border-radius: 8px;
+            border: 2px solid rgba(255,255,255,0.1); cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .color-btn:active { transform: scale(0.9); }
+        .palette.gold-mode .color-btn {
+            border-color: rgba(251,191,36,0.3);
+            box-shadow: 0 2px 8px rgba(251,191,36,0.1);
+        }
+
+        .sell-btn {
+            width: 100%; margin-top: 10px; padding: 14px; border: none;
+            border-radius: 15px; color: white; font-size: 15px; font-weight: 700;
+            cursor: pointer; transition: transform 0.2s;
+        }
+        .sell-btn:active { transform: scale(0.98); }
+
+        .museum-section {
+            margin-top: 20px; border-top: 2px solid rgba(51,65,85,0.5);
+            padding-top: 15px; padding-bottom: 20px;
+        }
+        .museum-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+        .museum-card {
+            background: var(--card); padding: 8px; border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.05); text-align: center;
+            transition: transform 0.2s;
+            position: relative; overflow: hidden;
+        }
+        .museum-card:active { transform: scale(0.98); }
+        .museum-card-bg {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            object-fit: cover; opacity: 0.15; z-index: 0;
+            filter: blur(2px); transition: opacity 0.5s ease;
+        }
+        .museum-card-content { position: relative; z-index: 1; }
+        .museum-card img.museum-painting {
+            width: 100%; border-radius: 10px; background: white;
+            position: relative; z-index: 1;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .museum-likes {
+            font-size: 11px; color: #f472b6; font-weight: bold;
+            display: flex; align-items: center; justify-content: center; gap: 4px;
+            margin: 4px 0; background: rgba(244,114,182,0.1);
+            padding: 2px 0; border-radius: 8px;
+            position: relative; z-index: 1;
+        }
+        .setting-row {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 20px; color: var(--text);
+        }
+        .achievement-info {
+            background: var(--card); padding: 15px; border-radius: 20px;
+            margin-top: 20px; margin-bottom: 30px;
+            border: 1px solid rgba(51,65,85,0.5);
+        }
+        .achievement-info h3 { margin-top: 0; font-size: 14px; color: var(--gold); }
+        .achievement-table { width: 100%; font-size: 12px; border-collapse: collapse; }
+        .achievement-table td { padding: 8px 4px; border-bottom: 1px solid rgba(51,65,85,0.2); }
+        .achievement-table .badge-icon { font-size: 18px; width: 30px; }
+
+        #modal, #previewOverlay, #colorModal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(4px);
+            display: none; justify-content: center; align-items: center; z-index: 2000;
+        }
+        .modal-box {
+            background: var(--card); padding: 25px; border-radius: 24px;
+            width: 80%; max-width: 300px; text-align: center; color: var(--text);
+        }
+        #colorModal .modal-box { max-width: 350px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .color-grid-extended { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin-top: 15px; }
+        .color-section-title {
+            font-size: 12px; font-weight: bold; margin: 15px 0 5px;
+            color: var(--gold); text-align: left; text-transform: uppercase;
+        }
+        .preview-container { position: relative; width: 90%; max-width: 450px; }
+        .preview-container img { width: 100%; border-radius: 20px; background: white; }
+
+        #profileModal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.88);
+            display: none; justify-content: center; align-items: center; z-index: 5500;
+            padding: 20px; box-sizing: border-box;
+        }
+        .profile-modal-box {
+            background: var(--card); padding: 18px 16px 14px;
+            border-radius: 22px; text-align: center;
+            border: 2px solid var(--accent);
+            animation: rewardPop 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+            width: 100%; max-width: 300px;
+            max-height: 86vh; overflow-y: auto; overflow-x: hidden;
+            scrollbar-width: none; -ms-overflow-style: none;
+        }
+        .profile-modal-box::-webkit-scrollbar { display: none; }
+        .profile-preview-large {
+            width: 80px; height: 80px; border-radius: 50%;
+            object-fit: cover; border: 3px solid var(--accent);
+            margin: 8px auto 6px; display: block;
+            box-shadow: 0 5px 16px rgba(0,0,0,0.4);
+            background: rgba(255,255,255,0.1);
+        }
+        .profile-modal-box .sell-btn { padding: 9px 12px; font-size: 12px; margin-top: 5px; }
+        .pm-divider {
+            width: 100%; height: 1px; margin: 12px 0 10px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        }
+        .pm-section-lbl {
+            font-size: 10px; font-weight: 700; color: #64748b;
+            text-transform: uppercase; letter-spacing: 1.5px;
+            display: block; text-align: left; margin-bottom: 7px;
+        }
+        /* Banner preview thumbnail */
+        .banner-preview-strip {
+            width: 100%; height: 68px; border-radius: 10px;
+            overflow: hidden; position: relative;
+            background: rgba(15,23,42,0.55);
+            border: 1.5px dashed rgba(255,255,255,0.15);
+            margin-bottom: 7px; display: flex;
+            align-items: center; justify-content: center;
+            transition: border-color 0.25s;
+        }
+        .banner-preview-strip.loaded { border: 1.5px solid var(--success); }
+        #bannerPreviewImg {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            object-fit: cover; display: none;
+        }
+        #bannerPreviewImg.visible { display: block; }
+        .banner-preview-placeholder {
+            display: flex; align-items: center; gap: 6px;
+            opacity: 0.3; font-size: 11px; pointer-events: none;
+        }
+        #bannerStatusChip {
+            position: absolute; top: 4px; right: 5px;
+            background: var(--success); color: #fff;
+            font-size: 8px; font-weight: 800; padding: 2px 6px;
+            border-radius: 20px; display: none;
+        }
+        #bannerStatusChip.visible { display: block; }
+        .banner-cost-note {
+            font-size: 10px; font-weight: 700; color: var(--gold);
+            background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.28);
+            border-radius: 20px; padding: 3px 10px;
+            display: inline-block; margin-bottom: 7px;
+        }
+        .rename-section { margin-top: 2px; margin-bottom: 6px; }
+        .rename-section label {
+            font-size: 10px; font-weight: 700; color: #94a3b8;
+            text-transform: uppercase; letter-spacing: 1px;
+            display: block; margin-bottom: 5px;
+        }
+        .rename-input {
+            width: 100%; padding: 9px 12px; border: 2px solid #334155;
+            border-radius: 10px; background: rgba(15,23,42,0.5);
+            color: var(--text); box-sizing: border-box; outline: none;
+            font-size: 13px; font-weight: 700; text-align: center;
+            transition: border-color 0.3s ease;
+        }
+        .rename-input:focus { border-color: var(--accent); }
+
+        /* ===== LEADERBOARD ===== */
+        .leaderboard-section {
+            background: var(--card); padding: 15px; border-radius: 20px;
+            margin-bottom: 15px; border: 1px solid rgba(251,191,36,0.4);
+            transition: background var(--sky-transition);
+        }
+        .leaderboard-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 12px;
+        }
+        .leaderboard-header h3 { margin: 0; font-size: 14px; color: var(--gold); }
+        .leaderboard-refresh {
+            font-size: 10px; color: rgba(148,163,184,0.7); font-style: italic;
+        }
+        .leaderboard-list { display: flex; flex-direction: column; gap: 8px; }
+        .leaderboard-item {
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(15,23,42,0.3); padding: 10px 12px;
+            border-radius: 14px; border: 1px solid rgba(51,65,85,0.4);
+            transition: all 0.3s ease; position: relative; overflow: hidden;
+        }
+        .leaderboard-item.rank-1 {
+            border-color: rgba(251,191,36,0.6);
+            background: rgba(251,191,36,0.08);
+            box-shadow: 0 0 14px rgba(251,191,36,0.12);
+        }
+        .leaderboard-item.rank-2 {
+            border-color: rgba(148,163,184,0.5);
+            background: rgba(148,163,184,0.06);
+        }
+        .leaderboard-item.rank-3 {
+            border-color: rgba(180,120,60,0.5);
+            background: rgba(180,120,60,0.06);
+        }
+        .leaderboard-item.is-me {
+            border-color: rgba(139,92,246,0.6);
+            background: rgba(139,92,246,0.1);
+        }
+        .lb-rank-badge {
+            width: 28px; height: 28px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 800; flex-shrink: 0;
+            background: rgba(51,65,85,0.5); color: rgba(148,163,184,0.8);
+        }
+        .lb-rank-badge.gold { background: linear-gradient(135deg,#f59e0b,#fbbf24); color:#0f172a; box-shadow: 0 2px 8px rgba(251,191,36,0.4); }
+        .lb-rank-badge.silver { background: linear-gradient(135deg,#94a3b8,#cbd5e1); color:#0f172a; }
+        .lb-rank-badge.bronze { background: linear-gradient(135deg,#a16207,#d97706); color:#fff; }
+        .lb-avatar {
+            font-size: 22px; width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(51,65,85,0.4); border-radius: 50%; flex-shrink: 0;
+        }
+        .lb-info { flex: 1; min-width: 0; }
+        .lb-name {
+            font-size: 12px; font-weight: 700; white-space: nowrap;
+            overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px;
+        }
+        .lb-badge { font-size: 10px; opacity: 0.7; }
+        .lb-saldo {
+            font-size: 11px; font-weight: 800; color: var(--gold);
+            text-align: right; flex-shrink: 0;
+        }
+        .lb-crown {
+            position: absolute; top: -2px; right: 8px;
+            font-size: 16px; opacity: 0.6;
+        }
+        .lb-me-label {
+            font-size: 9px; font-weight: 800; color: var(--accent);
+            background: rgba(139,92,246,0.2); padding: 2px 6px;
+            border-radius: 6px; margin-left: 4px;
+        }
+        @keyframes lbSlideIn {
+            from { opacity: 0; transform: translateX(-15px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .leaderboard-item { animation: lbSlideIn 0.4s ease both; }
+        .lb-update-note {
+            text-align: center; font-size: 10px; color: rgba(148,163,184,0.5);
+            margin-top: 10px; font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<audio id="sfx-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" preload="auto"></audio>
+<audio id="sfx-money" src="https://assets.mixkit.co/active_storage/sfx/2017/2017-preview.mp3" preload="auto"></audio>
+<audio id="sfx-whistle" src="https://assets.mixkit.co/active_storage/sfx/600/600-preview.mp3" preload="auto"></audio>
+<audio id="sfx-splat" src="https://assets.mixkit.co/active_storage/sfx/2012/2012-preview.mp3" preload="auto"></audio>
+<audio id="sfx-boo" src="https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3" preload="auto"></audio>
+<audio id="sfx-message" src="https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3" preload="auto"></audio>
+
+<div id="toastContainer"></div>
+<div id="tutorialOverlay"></div>
+
+<div class="sky-effect">
+    <div class="stars"></div>
+    <div class="sun-moon" id="astralBody"></div>
+    <div id="stormOverlay">
+        <div class="storm-clouds">
+            <div class="cloud-layer cloud-layer-1"></div>
+            <div class="cloud-layer cloud-layer-2"></div>
+        </div>
+        <div class="storm-fog"></div>
+    </div>
+    <canvas id="rainCanvas"></canvas>
+    <div id="lightning"></div>
+</div>
+
+<div id="giftBtn" class="gift-float" onclick="claimDailyGift()">🎁</div>
+<div id="settingsBtn" class="settings-float" onclick="toggleSettings()">⚙</div>
+<div id="messageBtn" class="message-float" onclick="openMessageModal()">
+    💌
+    <span id="msgBadge" class="msg-badge-count hidden">0</span>
+</div>
+
+<div id="splash-screen">
+    <div class="splash-content">
+        <div class="splash-title">Vis Artistik</div>
+        <div class="splash-dev">Developer Mellonvis</div>
+    </div>
+</div>
+
+<div id="tutorialPopup">
+    <div id="tutorialEmoji" style="font-size:30px; margin-bottom:10px;">👋</div>
+    <div class="tutorial-text" id="tutorialText">Halo! Selamat datang di studio barumu.</div>
+    <button class="btn-small" style="width:100%; background:var(--accent);" onclick="nextTutorial()">Lanjut</button>
+</div>
+
+<div id="rewardModal">
+    <div class="reward-box">
+        <span class="gift-anim">🎁</span>
+        <h2 style="color:var(--gold); margin:10px 0;">Kejutan!</h2>
+        <p id="rewardText" style="font-size:14px; line-height:1.6;"></p>
+        <button class="sell-btn" style="background:var(--success); margin-top:20px;" onclick="closeReward()">Terima Kasih!</button>
+    </div>
+</div>
+
+<div id="settingsModal">
+    <div class="settings-box">
+        <h2 style="color:var(--accent); margin-top:0;">⚙ Pengaturan</h2>
+        <div class="setting-row">
+            <span>🔊 Efek Suara</span>
+            <button id="muteBtn" class="btn-small" onclick="toggleMute()" style="width:100px;">Aktif</button>
+        </div>
+        <div class="setting-row">
+            <span>📺 Resolusi</span>
+            <button id="resBtn" class="btn-small" onclick="toggleResolution()" style="width:100px;">High</button>
+        </div>
+        <div class="setting-row">
+            <span>🏞️ Animasi Banner</span>
+            <button id="bannerAnimBtn" class="btn-small" onclick="toggleBannerAnim()" style="width:100px;">Aktif</button>
+        </div>
+        <button class="sell-btn" style="background:var(--danger); margin-top:10px;" onclick="toggleSettings()">Tutup</button>
+    </div>
+</div>
+
+<div id="colorModal">
+    <div class="modal-box">
+        <h3 style="margin-top:0;">🎨 Koleksi Warna</h3>
+        <div class="color-section-title">🌿 Hijau Alam</div>
+        <div class="color-grid-extended" id="natureColors"></div>
+        <div class="color-section-title">🌊 Biru Laut</div>
+        <div class="color-grid-extended" id="oceanColors"></div>
+        <div class="color-section-title">🍂 Tanah & Earth</div>
+        <div class="color-grid-extended" id="earthColors"></div>
+        <div class="color-section-title">🌅 Sunset & Candy</div>
+        <div class="color-grid-extended" id="candyColors"></div>
+        <div class="color-section-title">🌸 Pastel Lembut</div>
+        <div class="color-grid-extended" id="pastelColors"></div>
+        <div class="color-section-title">🌑 Gelap & Misterius</div>
+        <div class="color-grid-extended" id="darkColors"></div>
+        <div class="color-section-title">🔥 Api & Merah</div>
+        <div class="color-grid-extended" id="fireColors"></div>
+        <div class="color-section-title">✨ Metalik & Shimmer</div>
+        <div class="color-grid-extended" id="metallicColors"></div>
+        <button class="btn-small" style="width:100%; margin-top:20px; background:var(--danger);" onclick="closeColorModal()">Tutup</button>
+    </div>
+</div>
+
+<div id="profileModal">
+    <div class="profile-modal-box">
+
+        <!-- Foto Profil -->
+        <p style="font-size:14px;font-weight:800;color:var(--accent);margin:0 0 2px;">📷 Profil Toko</p>
+        <img id="profilePreviewLarge" class="profile-preview-large" src="" alt="Profile">
+        <input type="file" id="profileInput" accept="image/*" onchange="handleProfileUpload(event)" style="display:none;">
+        <button class="sell-btn" style="background:var(--accent);width:100%;" onclick="document.getElementById('profileInput').click()">📁 Pilih Foto Profil</button>
+        <button class="sell-btn" style="background:var(--danger);width:100%;" onclick="removeProfilePic()">🗑 Hapus Foto</button>
+
+        <div class="pm-divider"></div>
+
+        <!-- Banner Kustom -->
+        <span class="pm-section-lbl">🏞️ Banner Toko — dari Galeri</span>
+        <div class="banner-preview-strip" id="bannerPreviewStrip">
+            <img id="bannerPreviewImg" src="" alt="Banner">
+            <span id="bannerStatusChip">✓ AKTIF</span>
+            <div class="banner-preview-placeholder" id="bannerPreviewPlaceholder">
+                <span style="font-size:22px;">🖼️</span>
+                <span>Belum ada banner</span>
+            </div>
+        </div>
+        <span class="banner-cost-note">💰 Biaya pasang: Rp 500.000</span>
+        <input type="file" id="customBannerInput" accept="image/*" onchange="handleCustomBannerUpload(event)" style="display:none;">
+        <button class="sell-btn" style="background:linear-gradient(135deg,#d97706,#fbbf24);color:#0f172a;font-weight:800;width:100%;" onclick="document.getElementById('customBannerInput').click()">🖼️ Pilih Foto Banner</button>
+        <button class="sell-btn" style="background:#475569;width:100%;" onclick="removeCustomBanner()">✕ Hapus Banner Kustom</button>
+
+        <div class="pm-divider"></div>
+
+        <!-- Nama Toko -->
+        <div class="rename-section">
+            <label>✏️ Nama Toko</label>
+            <input type="text" id="renameInput" class="rename-input" placeholder="Nama toko baru..." maxlength="25">
+        </div>
+        <button class="sell-btn" style="background:var(--success);width:100%;" onclick="saveShopName()">💾 Simpan Nama</button>
+
+        <div class="pm-divider"></div>
+        <button class="sell-btn" style="background:#334155;width:100%;margin-top:0;" onclick="closeProfileModal()">Tutup</button>
+    </div>
+</div>
+
+<div id="messageModal">
+    <div class="message-modal-box">
+        <div class="message-modal-header">
+            <span>💌</span>
+            <h3>Pesan Kolektor Seni</h3>
+        </div>
+        <div class="message-list" id="messageList">
+            <div class="message-empty"><span>📭</span><div>Belum ada pesan masuk</div></div>
+        </div>
+        <button class="btn-small" style="width:100%; padding:14px; border-radius:0 0 22px 22px; background:rgba(51,65,85,0.5); font-size:13px;" onclick="closeMessageModal()">Tutup</button>
+    </div>
+</div>
+
+<div class="main-container">
+    <div id="reputationNotif">
+        <span class="close-notif" onclick="closeRepNotif()">X</span>
+        <div id="reputationEmoji" style="font-size:50px; margin-bottom:10px;">🏆</div>
+        <h2 style="margin:0; color:var(--gold); font-size:20px;">Selamat!</h2>
+        <p id="reputationText" style="font-size:14px; line-height:1.5; margin-top:10px;"></p>
+    </div>
+
+    <div id="visitorNotif">
+        <div class="visitor-info" style="display:flex; align-items:center; gap:12px;">
+            <div id="vEmoji" style="font-size:32px; background:rgba(51,65,85,0.5); padding:10px; border-radius:15px;">🧐</div>
+            <div id="vText" style="flex:1; font-size:13px; line-height:1.4;">...</div>
+        </div>
+        <div class="visitor-actions" id="visitorActions" style="display:flex; gap:8px;">
+            <button id="vAccept" class="btn-small" style="background:var(--success); flex:1">Jual</button>
+            <button id="vReject" class="btn-small" style="background:var(--danger); flex:1">Usir</button>
+        </div>
+    </div>
+
+    <div id="register">
+        <div class="register-box">
+            <h2>🎨 Art Shop</h2>
+            <input id="shopName" placeholder="Nama Toko Lukisan Anda...">
+            <button onclick="createShop()">Mulai Bisnis</button>
+        </div>
+    </div>
+
+    <div id="game">
+        <div class="header" id="tutorial-header">
+            <img id="bannerImage" src="" alt="Banner">
+            <img id="bannerImage2" src="" alt="Banner2">
+            <div class="banner-overlay"></div>
+            <div class="header-content">
+                <div class="header-top">
+                    <div class="profile-pic-wrapper" onclick="openProfileModal()">
+                        <img id="profilePic" class="profile-pic" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23334155'/%3E%3Ccircle cx='50' cy='38' r='18' fill='%2394a3b8'/%3E%3Cellipse cx='50' cy='75' rx='28' ry='20' fill='%2394a3b8'/%3E%3C/svg%3E" alt="Profile">
+                        <div class="profile-pic-edit" id="profileEditBadge">📷</div>
+                    </div>
+                    <div class="shop-text-content">
+                        <span class="shop-sub">✦ ART STUDIO ✦</span>
+                        <div id="shopTitle"></div>
+                    </div>
+                    <div id="timeStatus" class="time-status">Malam</div>
+                </div>
+                <div class="header-bottom">
+                    <div class="balance">Rp <span id="saldo">0</span></div>
+                    <div class="badge-display" id="badgeDisplay">🎗</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-panel" id="tutorial-stats">
+            <div class="stats-header" onclick="toggleStats()">
+                <h3>📊 Statistik Toko</h3>
+                <span class="stats-toggle" id="statsToggle">▼</span>
+            </div>
+            <div class="stats-body" id="statsBody">
+                <div class="stats-grid">
+                    <div class="stat-card"><span class="stat-value" id="statTotalSold">0</span><span class="stat-label">Lukisan Terjual</span></div>
+                    <div class="stat-card"><span class="stat-value" id="statTotalIncome">0</span><span class="stat-label">Total Penghasilan</span></div>
+                    <div class="stat-card"><span class="stat-value" id="statMuseumCount">0</span><span class="stat-label">Koleksi Museum</span></div>
+                    <div class="stat-card"><span class="stat-value" id="statHighest">0</span><span class="stat-label">Harga Tertinggi</span></div>
+                </div>
+                <div class="chart-section">
+                    <div class="chart-tabs">
+                        <button class="chart-tab-btn active" onclick="switchChart('day',this)">📅 1 Hari</button>
+                        <button class="chart-tab-btn" onclick="switchChart('week',this)">📆 1 Minggu</button>
+                    </div>
+                    <div class="chart-box"><canvas id="incomeChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quest-panel" id="tutorial-quest">
+            <h3>📜 Quest Harian</h3>
+            <div id="questList"></div>
+        </div>
+
+        <div class="shop-container" id="tutorial-shop">
+            <div class="shop-tabs">
+                <button class="shop-tab active" onclick="switchShopTab('canvas', this)"><span class="shop-tab-icon">🖼️</span>Kanvas</button>
+                <button class="shop-tab" onclick="switchShopTab('banner', this)"><span class="shop-tab-icon">🏞️</span>Banner</button>
+                <button class="shop-tab" onclick="switchShopTab('supply', this)"><span class="shop-tab-icon">🎨</span>Supplies</button>
+            </div>
+            <div class="shop-tab-content active" id="tab-canvas">
+                <div class="shop-grid">
+                    <div class="shop-item"><span class="item-icon">🔲</span><b>Persegi</b><span class="stock" id="stock-square">Milik: 0</span><span>Rp 50rb</span><button class="btn-small" style="width:100%; padding:5px;" onclick="buyCanvas('square')">Beli</button></div>
+                    <div class="shop-item"><span class="item-icon">▬</span><b>Horizontal</b><span class="stock" id="stock-horizontal">Milik: 0</span><span>Rp 100rb</span><button class="btn-small" style="width:100%; padding:5px;" onclick="buyCanvas('horizontal')">Beli</button></div>
+                    <div class="shop-item"><span class="item-icon">▮</span><b>Vertikal</b><span class="stock" id="stock-vertical">Milik: 0</span><span>Rp 200rb</span><button class="btn-small" style="width:100%; padding:5px;" onclick="buyCanvas('vertical')">Beli</button></div>
+                </div>
+            </div>
+            <div class="shop-tab-content" id="tab-banner">
+                <div class="banner-shop-grid">
+                    <div class="shop-item"><span class="item-icon">🗾</span><b>Japan</b><span class="stock" id="banner-status-1">Rp 500k</span><button class="btn-small" style="width:100%; padding:5px;" id="btn-banner-1" onclick="buyBanner(1)">Beli</button></div>
+                    <div class="shop-item"><span class="item-icon">🌄</span><b>Sunset</b><span class="stock" id="banner-status-2">Rp 500k</span><button class="btn-small" style="width:100%; padding:5px;" id="btn-banner-2" onclick="buyBanner(2)">Beli</button></div>
+                    <div class="shop-item"><span class="item-icon">🏞️</span><b>Nature</b><span class="stock" id="banner-status-3">Rp 500k</span><button class="btn-small" style="width:100%; padding:5px;" id="btn-banner-3" onclick="buyBanner(3)">Beli</button></div>
+                    <div class="shop-item"><span class="item-icon">🌆</span><b>City</b><span class="stock" id="banner-status-4">Rp 500k</span><button class="btn-small" style="width:100%; padding:5px;" id="btn-banner-4" onclick="buyBanner(4)">Beli</button></div>
+                </div>
+            </div>
+            <div class="shop-tab-content" id="tab-supply">
+                <div class="shop-grid">
+                    <div class="shop-item"><span class="item-icon">⭐</span><b>Premium Brush</b><span class="stock" id="stock-premium">Belum</span><span>Rp 300rb</span><button class="btn-small" style="width:100%; padding:5px;" onclick="buySupply('premium')">Beli</button></div>
+                    <div class="shop-item"><span class="item-icon">🌈</span><b>Gradient Kit</b><span class="stock" id="stock-gradient">Belum</span><span>Rp 250rb</span><button class="btn-small" style="width:100%; padding:5px;" onclick="buySupply('gradient')">Beli</button></div>
+                    <div class="shop-item"><span class="item-icon">✨</span><b>Gold Palette</b><span class="stock" id="stock-goldpalette">Belum</span><span>Rp 400rb</span><button class="btn-small" style="width:100%; padding:5px;" onclick="buySupply('goldpalette')">Beli</button></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="canvasSelector" class="canvas-selector"></div>
+
+        <div id="canvasWrap">
+            <img id="canvasWrapBanner" src="" alt="">
+            <div class="canvas-placeholder" id="canvasPlaceholder">
+                <div class="canvas-placeholder-icon">🎨</div>
+                <div class="canvas-placeholder-text">Studio</div>
+            </div>
+            <canvas id="canvas" width="400" height="400"></canvas>
+            <div id="noCanvasMsg" class="no-canvas-msg" style="display:none;">
+                <span class="msg-icon">🪹</span>
+                <div class="msg-text">Belum ada kanvas terpasang</div>
+                <div class="msg-sub">Gunakan stok kanvas di atas!</div>
+            </div>
+        </div>
+
+        <div class="tools" id="tutorial-tools">
+            <div class="tool-row">
+                <span class="label-tool">Jenis Kuas</span>
+                <div class="brush-list" id="brushList">
+                    <div class="brush-item active" onclick="setBrush('normal',this)"><span style="font-size:20px">🖌️</span><span class="brush-name">Normal</span></div>
+                    <div class="brush-item" onclick="setBrush('flood',this)"><span style="font-size:20px">🪣</span><span class="brush-name">Cat Air</span></div>
+                    <div class="brush-item" onclick="setBrush('gradient',this)"><span style="font-size:20px">🌈</span><span class="brush-name">Gradien</span></div>
+                    <div class="brush-item" onclick="setBrush('line',this)"><span style="font-size:20px">📏</span><span class="brush-name">Garis</span></div>
+                    <div class="brush-item" onclick="setBrush('rect',this)"><span style="font-size:20px">▭</span><span class="brush-name">Kotak</span></div>
+                    <div class="brush-item" onclick="setBrush('circle',this)"><span style="font-size:20px">⭕</span><span class="brush-name">Bulat</span></div>
+                    <div class="brush-item" onclick="setBrush('eraser',this)"><span style="font-size:20px">🧽</span><span class="brush-name">Hapus</span></div>
+                    <div class="brush-item" onclick="setBrush('square-brush',this)"><span style="font-size:20px">⬛</span><span class="brush-name">Pahat</span></div>
+                    <div class="brush-item" onclick="setBrush('spray',this)"><span style="font-size:20px">💨</span><span class="brush-name">Spray</span></div>
+                    <div class="brush-item" onclick="setBrush('ink',this)"><span style="font-size:20px">✒️</span><span class="brush-name">Tinta</span></div>
+                    <div class="brush-item" onclick="setBrush('charcoal',this)"><span style="font-size:20px">🖍️</span><span class="brush-name">Arang</span></div>
+                    <div class="brush-item" onclick="setBrush('marker',this)"><span style="font-size:20px">🖋️</span><span class="brush-name">Spidol</span></div>
+                    <div class="brush-item" onclick="setBrush('faded',this)"><span style="font-size:20px">🌫️</span><span class="brush-name">Kabut</span></div>
+                    <div class="brush-item" onclick="setBrush('dashed',this)"><span style="font-size:20px">---</span><span class="brush-name">Putus</span></div>
+                    <div class="brush-item" onclick="setBrush('bubble',this)"><span style="font-size:20px">🫧</span><span class="brush-name">Gelembung</span></div>
+                    <div class="brush-item" onclick="setBrush('star',this)"><span style="font-size:20px">✨</span><span class="brush-name">Artistik</span></div>
+                    <div class="brush-item" onclick="setBrush('watercolor',this)"><span style="font-size:20px">🎨</span><span class="brush-name">Cat Air</span></div>
+                    <div class="brush-item" onclick="setBrush('neon',this)"><span style="font-size:20px">💡</span><span class="brush-name">Neon</span></div>
+                    <div class="brush-item" onclick="setBrush('splatter',this)"><span style="font-size:20px">💦</span><span class="brush-name">Cipratan</span></div>
+                    <div class="brush-item" onclick="setBrush('pencil',this)"><span style="font-size:20px">✏️</span><span class="brush-name">Pensil</span></div>
+                    <div class="brush-item" onclick="setBrush('oil',this)"><span style="font-size:20px">🖼️</span><span class="brush-name">Cat Minyak</span></div>
+                    <div class="brush-item" onclick="setBrush('ribbon',this)"><span style="font-size:20px">🎀</span><span class="brush-name">Pita</span></div>
+                    <div class="brush-item" onclick="setBrush('dots',this)"><span style="font-size:20px">⚪</span><span class="brush-name">Titik</span></div>
+                    <div class="brush-item" onclick="setBrush('glitter',this)"><span style="font-size:20px">🌟</span><span class="brush-name">Glitter</span></div>
+                    <div class="brush-item" onclick="setBrush('rough',this)"><span style="font-size:20px">🪨</span><span class="brush-name">Kasar</span></div>
+                    <div class="brush-item" onclick="setBrush('smudge',this)"><span style="font-size:20px">🌀</span><span class="brush-name">Blur</span></div>
+                </div>
+            </div>
+            <div class="tool-row" id="gradientRow" style="display:none;">
+                <span class="label-tool">Gradient</span>
+                <input type="color" id="gradColor1" value="#8b5cf6">
+                <span style="font-size:11px; opacity:0.6;">→</span>
+                <input type="color" id="gradColor2" value="#3b82f6">
+            </div>
+            <div class="tool-row">
+                <span class="label-tool">Warna & Size</span>
+                <input type="color" id="colorPicker" value="#8b5cf6">
+                <input type="range" id="brushSize" min="1" max="100" value="8" oninput="updateSizeIndicator(this.value)">
+                <span id="sizeDisplay">8</span>
+            </div>
+            <div class="tool-row" style="margin-top:5px; gap:8px;">
+                <button class="btn-small" style="flex:1" onclick="fillCanvas()">🪣 Bg</button>
+                <button class="btn-small" style="flex:0.5; background:var(--info);" onclick="undo()">↩</button>
+                <button class="btn-small" onclick="clearCanvas()">🔄 Reset</button>
+            </div>
+            <div class="palette" id="mainPalette">
+                <div class="color-btn" style="background:#000000" onclick="pick('#000000')"></div>
+                <div class="color-btn" style="background:#475569" onclick="pick('#475569')"></div>
+                <div class="color-btn" style="background:#94a3b8" onclick="pick('#94a3b8')"></div>
+                <div class="color-btn" style="background:#ffffff" onclick="pick('#ffffff')"></div>
+                <div class="color-btn" style="background:#ef4444" onclick="pick('#ef4444')"></div>
+                <div class="color-btn" style="background:#f97316" onclick="pick('#f97316')"></div>
+                <div class="color-btn" style="background:#facc15" onclick="pick('#facc15')"></div>
+                <div class="color-btn" style="background:#22c55e" onclick="pick('#22c55e')"></div>
+                <div class="color-btn" style="background:#10b981" onclick="pick('#10b981')"></div>
+                <div class="color-btn" style="background:#06b6d4" onclick="pick('#06b6d4')"></div>
+                <div class="color-btn" style="background:#3b82f6" onclick="pick('#3b82f6')"></div>
+                <div class="color-btn" style="background:#6366f1" onclick="pick('#6366f1')"></div>
+                <div class="color-btn" style="background:#a855f7" onclick="pick('#a855f7')"></div>
+                <div class="color-btn" style="background:#78350f" onclick="pick('#78350f')"></div>
+            </div>
+            <button class="btn-small" style="width:100%; margin-top:5px; background:linear-gradient(to right,#ef4444,#3b82f6);" onclick="openColorModal()">🌈 Warna Lainnya (30+)</button>
+        </div>
+
+        <div id="tutorial-actions">
+            <button class="sell-btn" style="background:var(--success)" onclick="openSell()">💰 Jual Langsung</button>
+            <button class="sell-btn" style="background:var(--accent)" onclick="saveToMuseum()">🏛 Pajang di Museum</button>
+        </div>
+
+        <div class="museum-section" id="tutorial-museum">
+            <h3>🏛 Koleksi Museum</h3>
+            <p style="font-size:11px; opacity:0.7; margin-bottom:10px;">*Nilai investasi naik Rp 500 / mnt</p>
+            <div id="museumList" class="museum-grid"></div>
+        </div>
+
+        <div class="achievement-info">
+            <h3>🎖️ Tingkatan Reputasi Toko</h3>
+            <table class="achievement-table">
+                <tr><td class="badge-icon">🎗</td><td><b>Pemula:</b> Awal membangun bisnis.</td></tr>
+                <tr><td class="badge-icon">🥉</td><td><b>Perunggu:</b> Total kekayaan Rp 1.000.000.</td></tr>
+                <tr><td class="badge-icon">🥈</td><td><b>Perak:</b> Total kekayaan Rp 10.000.000. <span style="color:#f472b6; font-size:10px;">🔓 Kolektor Seni aktif</span></td></tr>
+                <tr><td class="badge-icon">🥇</td><td><b>Emas:</b> Total kekayaan Rp 100.000.000.</td></tr>
+                <tr><td class="badge-icon">🏆</td><td><b>Legenda:</b> Total kekayaan Rp 1.000.000.000.</td></tr>
+            </table>
+        </div>
+
+        <!-- LEADERBOARD -->
+        <div class="leaderboard-section" id="leaderboardSection">
+            <div class="leaderboard-header">
+                <h3>🏆 Papan Peringkat Toko Terkaya</h3>
+                <span class="leaderboard-refresh" id="lbRefreshLabel">Diperbarui tiap hari</span>
+            </div>
+            <div class="leaderboard-list" id="leaderboardList">
+                <!-- Diisi oleh JS -->
+            </div>
+            <p class="lb-update-note">⏰ Peringkat berubah setiap hari — jadilah Toko No.1!</p>
+        </div>
+
+        <button class="btn-delete" style="background:none; color:#64748b; border:1px solid rgba(51,65,85,0.5); padding:10px; border-radius:10px; width:100%; cursor:pointer; margin-bottom:30px;" onclick="hapusAkun()">🗑 Hapus Data Toko</button>
+    </div>
+</div>
+
+<div id="modal">
+    <div class="modal-box">
+        <p id="priceText" style="font-size:14px;"></p>
+        <div style="display:flex; gap:10px;">
+            <button id="modalConfirmBtn" style="flex:1; padding:12px; border:none; border-radius:10px; color:white; font-weight:bold; background:var(--success);" onclick="confirmSell()">Jual</button>
+            <button style="flex:1; padding:12px; border:none; border-radius:10px; color:white; font-weight:bold; background:var(--danger);" onclick="closeModal()">Batal</button>
+        </div>
+    </div>
+</div>
+
+<div id="previewOverlay" onclick="closePreview()">
+    <div class="preview-container" onclick="event.stopPropagation()">
+        <button style="position:absolute; top:-40px; right:0; background:var(--danger); color:white; border:none; width:35px; height:35px; border-radius:50%; cursor:pointer;" onclick="closePreview()">X</button>
+        <img id="fullImg" src="">
+    </div>
+</div>
+
+<script>
+// ============================================================
+// INDEXEDDB STORAGE SYSTEM - Vis Artistik v28
+// Semua data game disimpan di IndexedDB agar tidak mudah hilang.
+// Menggunakan in-memory cache sehingga akses tetap sinkron
+// seperti localStorage, dengan persistensi ke IndexedDB.
+// ============================================================
+const IDB_NAME = "LukisankuDB";
+const IDB_VERSION = 1;
+const IDB_STORE = "gameData";
+
+let _idb = null;
+let _cache = {}; // In-memory cache (sync layer)
+
+function _openIDB() {
+    return new Promise((resolve, reject) => {
+        if (_idb) { resolve(_idb); return; }
+        const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+        req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(IDB_STORE)) {
+                db.createObjectStore(IDB_STORE);
+            }
+        };
+        req.onsuccess = (e) => { _idb = e.target.result; resolve(_idb); };
+        req.onerror = (e) => { console.error("IDB open error:", e); reject(e); };
+    });
+}
+
+function _idbGet(key) {
+    return _openIDB().then(db => new Promise((resolve, reject) => {
+        const tx = db.transaction(IDB_STORE, "readonly");
+        const req = tx.objectStore(IDB_STORE).get(key);
+        req.onsuccess = () => resolve(req.result !== undefined ? req.result : null);
+        req.onerror = (e) => reject(e);
+    }));
+}
+
+function _idbSet(key, value) {
+    return _openIDB().then(db => new Promise((resolve, reject) => {
+        const tx = db.transaction(IDB_STORE, "readwrite");
+        tx.objectStore(IDB_STORE).put(value, key);
+        tx.oncomplete = () => resolve();
+        tx.onerror = (e) => reject(e);
+    }));
+}
+
+function _idbDelete(key) {
+    return _openIDB().then(db => new Promise((resolve, reject) => {
+        const tx = db.transaction(IDB_STORE, "readwrite");
+        tx.objectStore(IDB_STORE).delete(key);
+        tx.oncomplete = () => resolve();
+        tx.onerror = (e) => reject(e);
+    }));
+}
+
+function _idbGetAll() {
+    return _openIDB().then(db => new Promise((resolve, reject) => {
+        const tx = db.transaction(IDB_STORE, "readonly");
+        const store = tx.objectStore(IDB_STORE);
+        const allKeys = [], allVals = [];
+        const reqKeys = store.getAllKeys();
+        reqKeys.onsuccess = () => {
+            const keys = reqKeys.result;
+            if (keys.length === 0) { resolve({}); return; }
+            let done = 0;
+            const result = {};
+            keys.forEach(k => {
+                const r = store.get(k);
+                r.onsuccess = () => { result[k] = r.result; done++; if(done===keys.length) resolve(result); };
+                r.onerror = () => { done++; if(done===keys.length) resolve(result); };
+            });
+        };
+        reqKeys.onerror = (e) => reject(e);
+    }));
+}
+
+// ====== Sync-compatible localStorage shim backed by IndexedDB ======
+const localStorage = {
+    getItem(key) {
+        const val = _cache.hasOwnProperty(key) ? _cache[key] : null;
+        return val;
+    },
+    setItem(key, value) {
+        _cache[key] = value;
+        _idbSet(key, value).catch(e => console.warn("IDB setItem error:", e));
+    },
+    removeItem(key) {
+        delete _cache[key];
+        _idbDelete(key).catch(e => console.warn("IDB removeItem error:", e));
+    },
+    clear() {
+        _cache = {};
+        _openIDB().then(db => {
+            const tx = db.transaction(IDB_STORE, "readwrite");
+            tx.objectStore(IDB_STORE).clear();
+        }).catch(e => console.warn("IDB clear error:", e));
+    }
+};
+
+// ====== Preload ALL data from IndexedDB into cache before game starts ======
+async function _preloadCacheFromIDB() {
+    try {
+        const all = await _idbGetAll();
+        _cache = all || {};
+    } catch(e) {
+        console.warn("IDB preload failed, using empty cache:", e);
+        _cache = {};
+    }
+}
+
+const KEY="lukisanku_pro";
+const MUSEUM_KEY="lukisanku_museum_pro";
+const SETTINGS_KEY="lukisanku_settings";
+const STATS_KEY="lukisanku_stats";
+const QUEST_KEY="lukisanku_quests";
+const PROFILE_KEY="lukisanku_profile";
+const INCOME_LOG_KEY="lukisanku_income_log";
+const MESSAGE_KEY="lukisanku_messages";
+const COLLECTOR_DATE_KEY="lukisanku_collector_date";
+const CUSTOM_BANNER_KEY="lukisanku_custom_banner";
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+
+const DEFAULT_PROFILE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23334155'/%3E%3Ccircle cx='50' cy='38' r='18' fill='%2394a3b8'/%3E%3Cellipse cx='50' cy='75' rx='28' ry='20' fill='%2394a3b8'/%3E%3C/svg%3E";
+
+function getIncomeLog() { return JSON.parse(localStorage.getItem(INCOME_LOG_KEY)) || []; }
+function addIncomeLog(price) {
+    let log = getIncomeLog();
+    log.push({ price: price, time: Date.now() });
+    if(log.length > 200) log = log.slice(-200);
+    localStorage.setItem(INCOME_LOG_KEY, JSON.stringify(log));
+}
+
+let currentChartMode = 'day';
+function switchChart(mode, btn) {
+    currentChartMode = mode;
+    document.querySelectorAll('.chart-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    drawIncomeChart();
+}
+
+function drawIncomeChart() {
+    const chartCanvas = document.getElementById('incomeChart');
+    if(!chartCanvas) return;
+    const cctx = chartCanvas.getContext('2d');
+    const parent = chartCanvas.parentElement;
+    chartCanvas.width = parent.clientWidth;
+    chartCanvas.height = parent.clientHeight;
+    const W = chartCanvas.width, H = chartCanvas.height;
+    cctx.clearRect(0, 0, W, H);
+    let log = getIncomeLog();
+    const now = Date.now();
+    let cutoff, labelFn, groupCount;
+    if(currentChartMode === 'day') {
+        cutoff = now - 24*60*60*1000; groupCount = 12;
+        labelFn = (i) => { const h = (i*2) % 24; return h + ':00'; };
+    } else {
+        cutoff = now - 7*24*60*60*1000; groupCount = 7;
+        labelFn = (i) => { const d = new Date(now - (6-i)*24*60*60*1000); return ['Min','Sen','Sel','Rab','Kam','Jum','Sab'][d.getDay()]; };
+    }
+    log = log.filter(e => e.time >= cutoff);
+    if(log.length === 0) {
+        cctx.fillStyle = 'rgba(148,163,184,0.3)'; cctx.font = '12px Inter, sans-serif';
+        cctx.textAlign = 'center'; cctx.fillText('Belum ada data penjualan', W/2, H/2); return;
+    }
+    let groups = new Array(groupCount).fill(0);
+    const span = now - cutoff;
+    log.forEach(e => { const ratio = (e.time - cutoff) / span; let idx = Math.floor(ratio * groupCount); if(idx >= groupCount) idx = groupCount - 1; if(idx < 0) idx = 0; groups[idx] += e.price; });
+    const maxVal = Math.max(...groups, 1);
+    const padL = 10, padR = 10, padT = 15, padB = 25;
+    const chartW = W - padL - padR, chartH = H - padT - padB, barW = chartW / groupCount;
+    cctx.strokeStyle = 'rgba(51,65,85,0.3)'; cctx.lineWidth = 1;
+    for(let i = 0; i <= 4; i++) { const y = padT + (chartH / 4) * i; cctx.beginPath(); cctx.moveTo(padL, y); cctx.lineTo(W - padR, y); cctx.stroke(); }
+    const pts = [];
+    groups.forEach((val, i) => {
+        const x = padL + i * barW + barW / 2, h = (val / maxVal) * chartH, y = padT + chartH - h;
+        const grad = cctx.createLinearGradient(x - barW*0.3, y, x - barW*0.3, padT + chartH);
+        grad.addColorStop(0, 'rgba(139,92,246,0.8)'); grad.addColorStop(1, 'rgba(59,130,246,0.3)');
+        cctx.fillStyle = grad; cctx.beginPath(); cctx.roundRect(x - barW*0.3, y, barW*0.6, h, [4,4,0,0]); cctx.fill();
+        pts.push({x, y});
+        cctx.fillStyle = 'rgba(148,163,184,0.6)'; cctx.font = '8px Inter, sans-serif'; cctx.textAlign = 'center'; cctx.fillText(labelFn(i), x, H - 5);
+    });
+    if(pts.length > 1) {
+        cctx.strokeStyle = '#fbbf24'; cctx.lineWidth = 2; cctx.lineJoin = 'round'; cctx.beginPath();
+        pts.forEach((p, i) => { if(i===0) cctx.moveTo(p.x, p.y); else cctx.lineTo(p.x, p.y); }); cctx.stroke();
+        pts.forEach(p => { cctx.fillStyle = '#fbbf24'; cctx.beginPath(); cctx.arc(p.x, p.y, 3, 0, Math.PI*2); cctx.fill(); });
+    }
+    cctx.fillStyle = 'rgba(251,191,36,0.7)'; cctx.font = 'bold 9px Inter, sans-serif'; cctx.textAlign = 'left';
+    cctx.fillText('Maks: Rp ' + formatShort(maxVal), padL + 2, padT - 3);
+}
+
+// ===== COLLECTOR SYSTEM =====
+function getPlayerRank() {
+    const d = JSON.parse(localStorage.getItem(KEY)); if(!d) return "Pemula";
+    const saldo = d.saldo || 0;
+    if(saldo >= 1000000000) return "Legenda"; if(saldo >= 100000000) return "Emas";
+    if(saldo >= 10000000) return "Perak"; if(saldo >= 1000000) return "Perunggu"; return "Pemula";
+}
+function isCollectorUnlocked() { return ["Perak","Emas","Legenda"].includes(getPlayerRank()); }
+
+function getCollectorDateData() {
+    const raw = localStorage.getItem(COLLECTOR_DATE_KEY);
+    if(!raw) return { date: "", count: 0 };
+    try { return JSON.parse(raw); } catch(e) { return { date: "", count: 0 }; }
+}
+function saveCollectorDateData(data) { localStorage.setItem(COLLECTOR_DATE_KEY, JSON.stringify(data)); }
+function getTodayCollectorCount() {
+    const data = getCollectorDateData(); const today = new Date().toDateString();
+    if(data.date !== today) return 0; return data.count || 0;
+}
+function incrementCollectorCount() {
+    const today = new Date().toDateString(); let data = getCollectorDateData();
+    if(data.date !== today) { data = { date: today, count: 0 }; }
+    data.count++; saveCollectorDateData(data);
+}
+function canSendCollectorMessage() { return getTodayCollectorCount() < 2; }
+
+function getMessages() { return JSON.parse(localStorage.getItem(MESSAGE_KEY)) || []; }
+function saveMessages(m) { localStorage.setItem(MESSAGE_KEY, JSON.stringify(m)); }
+
+const INVESTOR_NAMES = [
+    {name:"Pak Hartono", role:"Kolektor Seni Senior", emoji:"🧐"},
+    {name:"Ny. Sari Dewi", role:"Pemilik Galeri Nusantara", emoji:"👩‍💼"},
+    {name:"Mr. Hiroshi Tanaka", role:"Kurator Museum Tokyo", emoji:"🗾"},
+    {name:"Dr. Budi Wijaya", role:"Art Dealer Internasional", emoji:"🎩"},
+    {name:"Lady Victoria Rose", role:"Bangsawan Kolektor Eropa", emoji:"👸"},
+    {name:"Sheikh Abdullah Al-Rashid", role:"Kolektor Seni Dubai", emoji:"🕌"},
+    {name:"Prof. Heinrich Müller", role:"Kurator Museum Berlin", emoji:"🏛️"},
+    {name:"CEO Park Min-jun", role:"Konglomerat Seni Korea", emoji:"💼"},
+    {name:"Donna Isabella Moretti", role:"Pemilik Galeri Roma", emoji:"🇮🇹"},
+    {name:"Sir Edward Blackwood", role:"Kolektor Antik London", emoji:"🎭"},
+    {name:"Mme. Claire Dubois", role:"Direktur Seni Paris", emoji:"🗼"},
+    {name:"Tuan Zhang Wei", role:"Investor Seni Shanghai", emoji:"🏯"},
+    {name:"Ny. Ratna Kusuma", role:"Filantropis & Pecinta Seni", emoji:"💎"},
+    {name:"Don Carlos Rivera", role:"Kolektor Pribadi Madrid", emoji:"🇪🇸"},
+    {name:"Ms. Aiko Yamamoto", role:"CEO Galeri Digital Tokyo", emoji:"🌸"},
+    {name:"Pangeran Faisal", role:"Royal Art Collector", emoji:"👑"},
+    {name:"Prof. Anna Petrova", role:"Sejarawan Seni Moskow", emoji:"📚"},
+    {name:"Mr. James Worthington III", role:"Kolektor Warisan New York", emoji:"🗽"},
+    {name:"Ibu Megawati Santoso", role:"Pengusaha & Kolektor Jogja", emoji:"🎨"},
+    {name:"Baron Friedrich von Stein", role:"Kolektor Aristokrat Wina", emoji:"🏰"},
+];
+
+const INVESTOR_MESSAGES = [
+    "Saya sangat terkesan dengan karya yang dipajang di museum Anda. Komposisi warnanya mengingatkan saya pada karya-karya master Renaisans. Saya tertarik untuk membelinya.",
+    "Koleksi lukisan Anda telah menarik perhatian komunitas seni internasional. Beberapa rekan saya di London juga memuji keindahan teknik yang Anda gunakan.",
+    "Seni Anda memiliki nilai investasi yang sangat tinggi menurut analisis pasar seni kami. Tim penilai saya merekomendasikan untuk segera mengakuisisi karya ini.",
+    "Galeri saya sedang mempersiapkan pameran bertema seni kontemporer Asia Tenggara. Karya Anda akan menjadi pusat perhatian di acara tersebut!",
+    "Saya baru saja mengunjungi museum virtual Anda dan tidak bisa berhenti menatap lukisan ini. Ada sesuatu yang sangat emosional dan mendalam dari karya ini.",
+    "Teman-teman di komunitas kolektor seni merekomendasikan studio Anda. Setelah melihat sendiri, saya yakin ini adalah investasi yang tepat untuk koleksi pribadi saya.",
+    "Karya ini memiliki aura yang unik. Saya percaya dalam 10 tahun ke depan, nilainya akan meningkat berlipat ganda.",
+    "Museum nasional kami sangat membutuhkan karya dengan gaya seperti ini untuk melengkapi koleksi seni modern. Kami bersedia membayar harga premium.",
+    "Sebagai kurator yang telah berkecimpung 30 tahun di dunia seni, jarang saya menemukan karya yang begitu otentik dan penuh jiwa seperti milik Anda.",
+    "Klien VIP saya, seorang miliarder teknologi, secara khusus meminta saya untuk mencari karya dengan estetika seperti ini.",
+    "Saya telah mengikuti perkembangan studio Anda sejak lama. Kualitas karya yang Anda hasilkan terus meningkat.",
+    "Untuk pameran eksklusif di villa pribadi saya di Toscana, saya mencari karya yang bisa menjadi pembicaraan tamu-tamu undangan.",
+    "Departemen akuisisi seni kami telah mengevaluasi karya Anda dan memberikan penilaian 'sangat direkomendasikan'.",
+    "Anak saya yang baru lulus dari sekolah seni di Florence sangat mengagumi teknik Anda.",
+    "Yayasan seni yang saya pimpin sedang membangun koleksi tetap untuk museum baru kami.",
+    "Saya melihat lukisan Anda di museum dan langsung jatuh cinta. Warna, tekstur, dan emosi yang terpancar sangat luar biasa.",
+];
+
+function generateInvestorMessage(silent) {
+    if(!isCollectorUnlocked()) return false;
+    if(!canSendCollectorMessage()) return false;
+    const m = JSON.parse(localStorage.getItem(MUSEUM_KEY)) || [];
+    if(m.length === 0) return false;
+    const randomMuseum = m[Math.floor(Math.random() * m.length)];
+    const museumIdx = m.indexOf(randomMuseum);
+    const investor = INVESTOR_NAMES[Math.floor(Math.random() * INVESTOR_NAMES.length)];
+    const msgText = INVESTOR_MESSAGES[Math.floor(Math.random() * INVESTOR_MESSAGES.length)];
+    const currentPrice = randomMuseum.basePrice + Math.floor((Date.now() - randomMuseum.date) / 60000) * 500;
+    const multiplier = 1.5 + Math.random() * 3.5;
+    const offerPrice = Math.floor(currentPrice * multiplier);
+    const messages = getMessages();
+    messages.unshift({
+        id: Date.now() + Math.random(), investor: investor, message: msgText,
+        offerPrice: offerPrice, museumIndex: museumIdx,
+        paintingImg: randomMuseum.img, time: Date.now(), status: 'unread'
+    });
+    if(messages.length > 10) messages.pop();
+    saveMessages(messages); incrementCollectorCount(); updateMessageBadge();
+    if(!silent) {
+        playSFX('sfx-message');
+        showToast('📩 Pesan Baru!', investor.name + ' mengirim penawaran', 'gold', '💌', 4000);
+    }
+    return true;
+}
+
+// ===== OFFLINE COLLECTOR - generate on page load if needed =====
+function checkOfflineCollectorMessages() {
+    if(!isCollectorUnlocked()) return;
+    const m = JSON.parse(localStorage.getItem(MUSEUM_KEY)) || [];
+    if(m.length === 0) return;
+    const todayCount = getTodayCollectorCount();
+    if(todayCount >= 2) return;
+    // Generate 1-2 messages that "arrived while offline"
+    const toGenerate = Math.min(2 - todayCount, 1 + (Math.random() > 0.5 ? 1 : 0));
+    let generated = 0;
+    for(let i = 0; i < toGenerate; i++) {
+        if(generateInvestorMessage(true)) generated++;
+    }
+    if(generated > 0) {
+        setTimeout(() => {
+            playSFX('sfx-message');
+            showToast('📩 ' + generated + ' Pesan Baru!', 'Kolektor mengirim penawaran saat kamu pergi', 'gold', '💌', 5000);
+        }, 4000);
+    }
+}
+
+function updateMessageBadge() {
+    const messages = getMessages();
+    const unread = messages.filter(m => m.status === 'unread').length;
+    const badge = document.getElementById('msgBadge');
+    if(unread > 0) { badge.textContent = unread; badge.classList.remove('hidden'); }
+    else { badge.classList.add('hidden'); }
+}
+
+function openMessageModal() { document.getElementById('messageModal').style.display = 'flex'; renderMessages(); }
+function closeMessageModal() { document.getElementById('messageModal').style.display = 'none'; }
+
+function renderMessages() {
+    const messages = getMessages(); const list = document.getElementById('messageList');
+    if(!isCollectorUnlocked()) {
+        list.innerHTML = '<div class="message-empty"><span>🔒</span><div>Fitur Kolektor Seni Terkunci</div><div style="font-size:10px; margin-top:5px; line-height:1.5;">Raih reputasi <b>Perak</b> (Rp 10.000.000) untuk membuka pesan dari kolektor seni dunia!</div></div>'; return;
+    }
+    if(messages.length === 0) {
+        list.innerHTML = '<div class="message-empty"><span>📭</span><div>Belum ada pesan dari kolektor</div><div style="font-size:10px; margin-top:5px;">Pajang lukisan di museum untuk menarik kolektor seni!</div></div>'; return;
+    }
+    list.innerHTML = '';
+    messages.forEach((msg, i) => {
+        const timeAgo = getTimeAgo(msg.time);
+        const el = document.createElement('div');
+        el.className = 'message-item' + (msg.status === 'unread' ? ' unread' : '') + (msg.status !== 'unread' ? ' responded' : '');
+        let actionsHTML = '';
+        if(msg.status === 'unread') {
+            actionsHTML = '<div class="mi-actions"><button style="background:var(--success);" onclick="acceptInvestorOffer('+i+')">✅ Terima</button><button style="background:var(--danger);" onclick="declineInvestorOffer('+i+')">❌ Tolak</button></div>';
+        } else if(msg.status === 'accepted') { actionsHTML = '<div class="mi-status" style="color:var(--success);">✅ Penawaran Diterima</div>'; }
+        else { actionsHTML = '<div class="mi-status" style="color:var(--danger);">❌ Penawaran Ditolak</div>'; }
+        el.innerHTML = '<div class="mi-header"><div class="mi-avatar">'+msg.investor.emoji+'</div><div class="mi-info"><div class="mi-name">'+msg.investor.name+'</div><div class="mi-role">'+msg.investor.role+'</div></div><div class="mi-time">'+timeAgo+'</div></div><div class="mi-body">'+msg.message+'</div><div class="mi-offer"><div><div class="mi-offer-label">Penawaran untuk lukisan:</div><div class="mi-offer-price">Rp '+msg.offerPrice.toLocaleString('id-ID')+'</div></div>'+(msg.paintingImg?'<img class="mi-painting" src="'+msg.paintingImg+'" alt="">':'')+'</div>'+actionsHTML;
+        list.appendChild(el);
+    });
+}
+
+function getTimeAgo(ts) {
+    const diff = Date.now() - ts;
+    if(diff < 60000) return 'Baru saja'; if(diff < 3600000) return Math.floor(diff/60000) + ' mnt lalu';
+    if(diff < 86400000) return Math.floor(diff/3600000) + ' jam lalu'; return Math.floor(diff/86400000) + ' hari lalu';
+}
+
+function acceptInvestorOffer(index) {
+    const messages = getMessages(); const msg = messages[index];
+    if(!msg || msg.status !== 'unread') return;
+    const m = JSON.parse(localStorage.getItem(MUSEUM_KEY)) || [];
+    if(msg.museumIndex >= m.length) {
+        msg.status = 'declined'; saveMessages(messages);
+        showToast('Lukisan Tidak Ada', 'Lukisan sudah terjual sebelumnya', 'error', '❌');
+        renderMessages(); updateMessageBadge(); return;
+    }
+    const d = JSON.parse(localStorage.getItem(KEY));
+    d.saldo += msg.offerPrice; localStorage.setItem(KEY, JSON.stringify(d));
+    m.splice(msg.museumIndex, 1); localStorage.setItem(MUSEUM_KEY, JSON.stringify(m));
+    msg.status = 'accepted';
+    messages.forEach(mm => { if(mm.status === 'unread' && mm.museumIndex > msg.museumIndex) mm.museumIndex--; });
+    saveMessages(messages); playSFX('sfx-money');
+    updateBalanceDisplay(d.saldo); recordSale(msg.offerPrice); addIncomeLog(msg.offerPrice);
+    updateQuestProgress('sell', 1); updateQuestProgress('earn', msg.offerPrice);
+    renderMuseum(); renderMessages(); updateMessageBadge(); updateStatsUI(); drawIncomeChart();
+    showToast('💰 Terjual ke Kolektor!', msg.investor.name + ' membeli Rp ' + msg.offerPrice.toLocaleString('id-ID'), 'success', '🤝', 5000);
+}
+
+function declineInvestorOffer(index) {
+    const messages = getMessages(); if(!messages[index]) return;
+    messages[index].status = 'declined'; saveMessages(messages);
+    renderMessages(); updateMessageBadge(); showToast('Ditolak', 'Penawaran kolektor ditolak', 'info', '👋');
+}
+
+let collectorCheckInterval = null;
+function startCollectorScheduler() {
+    if(collectorCheckInterval) clearInterval(collectorCheckInterval);
+    // Check offline messages on load
+    checkOfflineCollectorMessages();
+    // Live check every 5 minutes
+    collectorCheckInterval = setInterval(() => {
+        if(!isCollectorUnlocked()) return;
+        if(!canSendCollectorMessage()) return;
+        const m = JSON.parse(localStorage.getItem(MUSEUM_KEY)) || [];
+        if(m.length === 0) return;
+        if(document.getElementById("game").style.display !== "block") return;
+        // ~2% chance per 5min check = decent daily coverage
+        if(Math.random() < 0.02) generateInvestorMessage(false);
+    }, 300000);
+}
+
+// ===== FRUIT THROW SYSTEM =====
+function throwFruitAtCanvas(fruitEmoji, color) {
+    const wrap = document.getElementById('canvasWrap'); const rect = wrap.getBoundingClientRect();
+    const targetX = rect.left + rect.width / 2, targetY = rect.top + rect.height / 2;
+    const side = Math.random() > 0.5 ? 'left' : 'right';
+    const sX = side === 'left' ? rect.left - 60 : rect.right + 60;
+    const sY = rect.top + Math.random() * rect.height * 0.5;
+    const fruit = document.createElement('div'); fruit.className = 'thrown-fruit';
+    fruit.textContent = fruitEmoji; fruit.style.left = sX + 'px'; fruit.style.top = sY + 'px';
+    document.body.appendChild(fruit);
+    const dx = targetX - sX, dy = targetY - sY, dur = 600, st = performance.now();
+    function anim(now) {
+        const t = Math.min((now - st) / dur, 1);
+        const arcY = -200 * Math.sin(Math.PI * t);
+        fruit.style.left = (sX + dx * t) + 'px'; fruit.style.top = (sY + dy * t + arcY) + 'px';
+        fruit.style.transform = 'rotate('+(t*720)+'deg) scale('+(0.5+t*0.8)+')';
+        if(t < 1) requestAnimationFrame(anim);
+        else { fruit.remove(); createSplat(targetX, targetY, fruitEmoji, color); playSFX('sfx-splat');
+            const c2 = document.getElementById('canvas'); c2.style.transform = 'scale(0.97) rotate(-1deg)';
+            setTimeout(()=>{c2.style.transform='scale(1.01) rotate(0.5deg)';},100);
+            setTimeout(()=>{c2.style.transform='';},250);
+        }
+    }
+    requestAnimationFrame(anim);
+}
+
+function createSplat(x, y, emoji, color) {
+    const splat = document.createElement('div');
+    splat.style.cssText = 'position:fixed;left:'+(x-25)+'px;top:'+(y-25)+'px;font-size:50px;z-index:9501;pointer-events:none;';
+    splat.textContent = '💥'; document.body.appendChild(splat);
+    const ss = performance.now();
+    function as(now) { const t=(now-ss)/500; if(t>1){splat.remove();return;} splat.style.transform='scale('+(0.3+t*1.7)+')'; splat.style.opacity=1-t; requestAnimationFrame(as); }
+    requestAnimationFrame(as);
+    for(let i=0;i<12;i++) {
+        const p=document.createElement('div');
+        p.style.cssText='position:fixed;left:'+x+'px;top:'+y+'px;width:'+(4+Math.random()*8)+'px;height:'+(4+Math.random()*8)+'px;border-radius:50%;background:'+color+';z-index:9502;pointer-events:none;';
+        document.body.appendChild(p);
+        const angle=(Math.PI*2/12)*i+Math.random()*0.5, dist=40+Math.random()*80;
+        const pdx=Math.cos(angle)*dist, pdy=Math.sin(angle)*dist, ps=performance.now();
+        function ap(now){const pt=(now-ps)/400;if(pt>1){p.remove();return;}const e=pt*(2-pt);p.style.left=(x+pdx*e)+'px';p.style.top=(y+pdy*e+30*pt*pt)+'px';p.style.opacity=1-pt;requestAnimationFrame(ap);}
+        requestAnimationFrame(ap);
+    }
+    const ft=document.createElement('div');
+    ft.style.cssText='position:fixed;left:'+(x-40)+'px;top:'+(y-40)+'px;z-index:9503;pointer-events:none;font-size:14px;font-weight:800;color:'+color+';text-shadow:0 2px 4px rgba(0,0,0,0.5);';
+    ft.textContent=emoji==='🍌'?'SPLAT!':'PLAK!'; document.body.appendChild(ft);
+    const fts=performance.now();
+    function aft(now){const t=(now-fts)/1000;if(t>1){ft.remove();return;}ft.style.top=(y-40-t*60)+'px';ft.style.opacity=1-t;requestAnimationFrame(aft);}
+    requestAnimationFrame(aft);
+}
+
+// ===== PROFILE PIC SYSTEM =====
+function openProfileModal() {
+    const modal=document.getElementById('profileModal'),preview=document.getElementById('profilePreviewLarge');
+    preview.src=localStorage.getItem(PROFILE_KEY)||DEFAULT_PROFILE;
+    const d=JSON.parse(localStorage.getItem(KEY));if(d)document.getElementById('renameInput').value=d.shop||'';
+    _syncBannerPreview();
+    modal.style.display='flex';
+}
+function closeProfileModal(){document.getElementById('profileModal').style.display='none';}
+
+// Sinkronisasi tampilan thumbnail banner di dalam modal profil
+function _syncBannerPreview(){
+    const stored=localStorage.getItem(CUSTOM_BANNER_KEY);
+    const img=document.getElementById('bannerPreviewImg');
+    const placeholder=document.getElementById('bannerPreviewPlaceholder');
+    const strip=document.getElementById('bannerPreviewStrip');
+    const chip=document.getElementById('bannerStatusChip');
+    const d=JSON.parse(localStorage.getItem(KEY));
+    const isActive=!!(d&&d.activeBanner==='custom');
+    if(stored){
+        img.src=stored; img.classList.add('visible');
+        placeholder.style.display='none';
+        strip.classList.add('loaded');
+        chip.style.display=isActive?'block':'none';
+        chip.classList.toggle('visible',isActive);
+    } else {
+        img.src=''; img.classList.remove('visible');
+        placeholder.style.display='flex';
+        strip.classList.remove('loaded');
+        chip.style.display='none'; chip.classList.remove('visible');
+    }
+}
+
+// ===== CUSTOM BANNER (foto dari galeri) =====
+function handleCustomBannerUpload(event){
+    const file=event.target.files[0]; if(!file) return;
+    event.target.value='';
+    if(file.size>3145728){showToast('File Terlalu Besar','Maksimal 3MB untuk banner','error','❌');return;}
+    const d=JSON.parse(localStorage.getItem(KEY)); if(!d) return;
+    // Biaya Rp500.000 hanya dipotong saat pertama kali memasang;
+    // mengganti foto banner yang sudah ada tidak dikenakan biaya tambahan.
+    const alreadyHasCustom=!!localStorage.getItem(CUSTOM_BANNER_KEY);
+    if(!alreadyHasCustom&&d.saldo<500000){
+        showToast('Saldo Kurang!','Pasang banner butuh Rp 500.000','error','💸');return;
+    }
+    const reader=new FileReader();
+    reader.onload=function(e){
+        const img=new Image();
+        img.onload=function(){
+            // Kompres & resize ke proporsi banner (maks 900×300 px, JPEG 82%)
+            const MAX_W=900,MAX_H=300;
+            let w=img.width,h=img.height;
+            const ratio=w/h;
+            if(w>MAX_W){w=MAX_W;h=Math.round(w/ratio);}
+            if(h>MAX_H){h=MAX_H;w=Math.round(h*ratio);}
+            const c=document.createElement('canvas');c.width=w;c.height=h;
+            c.getContext('2d').drawImage(img,0,0,w,h);
+            const dataUrl=c.toDataURL('image/jpeg',0.82);
+            // Potong saldo hanya saat pertama pasang
+            if(!alreadyHasCustom){d.saldo-=500000;}
+            d.activeBanner='custom';
+            localStorage.setItem(KEY,JSON.stringify(d));
+            localStorage.setItem(CUSTOM_BANNER_KEY,dataUrl);
+            playSFX('sfx-money');
+            updateBalanceDisplay(d.saldo);
+            _applyAnyBanner('custom');
+            updateCanvasWrapBanner();
+            updateInventoryUI();
+            renderMuseum();
+            _syncBannerPreview();
+            restartBannerSlideshow();
+            const msg=alreadyHasCustom?'Banner kustom berhasil diperbarui':'-Rp 500.000 · Banner dari galeri aktif';
+            showToast('Banner Terpasang!',msg,'success','🏞️',4000);
+        };
+        img.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeCustomBanner(){
+    if(!localStorage.getItem(CUSTOM_BANNER_KEY)){
+        showToast('Tidak Ada Banner','Belum ada banner kustom','info','ℹ️');return;
+    }
+    localStorage.removeItem(CUSTOM_BANNER_KEY);
+    const d=JSON.parse(localStorage.getItem(KEY));
+    if(d&&d.activeBanner==='custom'){
+        const lastPreset=d.banners&&d.banners.length>0?d.banners[d.banners.length-1]:null;
+        d.activeBanner=lastPreset;
+        localStorage.setItem(KEY,JSON.stringify(d));
+    }
+    _applyAnyBanner(JSON.parse(localStorage.getItem(KEY))?.activeBanner||null);
+    updateCanvasWrapBanner();
+    updateInventoryUI();
+    renderMuseum();
+    _syncBannerPreview();
+    restartBannerSlideshow();
+    showToast('Banner Dihapus','Banner kustom telah dihapus','info','🗑');
+}
+
+// Helper: terapkan banner apa pun (preset angka 1-4 ATAU 'custom')
+function _applyAnyBanner(id){
+    const img1=document.getElementById('bannerImage'),img2=document.getElementById('bannerImage2'),header=document.querySelector('.header');
+    img2.classList.remove('active');img2.src='';bannerCurrentLayer=1;
+    let url=null;
+    if(id==='custom') url=localStorage.getItem(CUSTOM_BANNER_KEY);
+    else if(id&&BANNERS[id]) url=BANNERS[id];
+    if(url){img1.src=url;img1.classList.add('active');header.classList.add('has-banner');}
+    else{img1.src='';img1.classList.remove('active');header.classList.remove('has-banner');}
+}
+function handleProfileUpload(event) {
+    const file=event.target.files[0]; if(!file) return;
+    if(file.size>500000){showToast('File Terlalu Besar','Maksimal 500KB','error','❌');return;}
+    const reader=new FileReader();
+    reader.onload=function(e){
+        const img=new Image(); img.onload=function(){
+            const c=document.createElement('canvas'); c.width=150; c.height=150;
+            const cc=c.getContext('2d'); const size=Math.min(img.width,img.height);
+            cc.drawImage(img,(img.width-size)/2,(img.height-size)/2,size,size,0,0,150,150);
+            const dataUrl=c.toDataURL('image/jpeg',0.8);
+            localStorage.setItem(PROFILE_KEY,dataUrl); updateProfilePicUI();
+            document.getElementById('profilePreviewLarge').src=dataUrl;
+            showToast('Foto Dipasang!','Foto profil berhasil diperbarui','success','📷');
+        }; img.src=e.target.result;
+    }; reader.readAsDataURL(file); event.target.value='';
+}
+function removeProfilePic() { localStorage.removeItem(PROFILE_KEY); updateProfilePicUI(); document.getElementById('profilePreviewLarge').src=DEFAULT_PROFILE; showToast('Foto Dihapus','Foto profil kembali ke default','info','🗑'); }
+function updateProfilePicUI() {
+    const saved=localStorage.getItem(PROFILE_KEY); document.getElementById('profilePic').src=saved||DEFAULT_PROFILE;
+    const eb=document.getElementById('profileEditBadge'); if(saved) eb.classList.add('hidden'); else eb.classList.remove('hidden');
+}
+function saveShopName() {
+    const newName=document.getElementById('renameInput').value.trim();
+    if(!newName){showToast('Nama Kosong','Masukkan nama toko','error','❌');return;}
+    if(newName.length<2){showToast('Terlalu Pendek','Minimal 2 karakter','error','❌');return;}
+    const d=JSON.parse(localStorage.getItem(KEY)); if(!d)return;
+    d.shop=newName.toUpperCase(); localStorage.setItem(KEY,JSON.stringify(d));
+    document.getElementById('shopTitle').innerText=d.shop;
+    showToast('Nama Diubah!','Toko: "'+d.shop+'"','success','✏️');
+}
+
+function showToast(title, msg, type='info', icon='ℹ️', duration=3000) {
+    const container=document.getElementById('toastContainer');
+    const toast=document.createElement('div'); toast.className='toast toast-'+type;
+    toast.innerHTML='<div class="toast-icon">'+icon+'</div><div class="toast-body"><div class="toast-title">'+title+'</div><div class="toast-msg">'+msg+'</div></div><div class="toast-progress"></div>';
+    toast.querySelector('.toast-progress').style.animationDuration=duration+'ms';
+    container.appendChild(toast);
+    setTimeout(()=>{toast.classList.add('removing');setTimeout(()=>toast.remove(),300);},duration);
+    if(container.children.length>4) container.firstChild.remove();
+}
+
+function getStats() { return JSON.parse(localStorage.getItem(STATS_KEY))||{totalSold:0,totalIncome:0,highestPrice:0,totalPaintings:0,totalStrokes:0}; }
+function saveStats(s) { localStorage.setItem(STATS_KEY,JSON.stringify(s)); }
+function recordSale(price) { const s=getStats(); s.totalSold++; s.totalIncome+=price; if(price>s.highestPrice) s.highestPrice=price; saveStats(s); updateStatsUI(); }
+function recordPainting() { const s=getStats(); s.totalPaintings++; saveStats(s); updateStatsUI(); }
+function updateStatsUI() {
+    const s=getStats(), m=JSON.parse(localStorage.getItem(MUSEUM_KEY))||[];
+    document.getElementById('statTotalSold').textContent=s.totalSold;
+    document.getElementById('statTotalIncome').textContent=formatShort(s.totalIncome);
+    document.getElementById('statMuseumCount').textContent=m.length;
+    document.getElementById('statHighest').textContent=formatShort(s.highestPrice);
+}
+function formatShort(n) { if(n>=1e9) return (n/1e9).toFixed(1)+'M'; if(n>=1e6) return (n/1e6).toFixed(1)+'Jt'; if(n>=1e3) return (n/1e3).toFixed(1)+'rb'; return n.toString(); }
+function toggleStats() {
+    const body=document.getElementById('statsBody'), toggle=document.getElementById('statsToggle');
+    body.classList.toggle('open'); toggle.classList.toggle('open');
+    if(body.classList.contains('open')) setTimeout(()=>drawIncomeChart(),100);
+}
+
+const QUEST_TEMPLATES=[
+    {id:'sell1',name:'Pedagang Pemula',desc:'Jual 1 lukisan hari ini',icon:'💰',target:1,type:'sell',reward:25000},
+    {id:'sell3',name:'Pelukis Rajin',desc:'Jual 3 lukisan hari ini',icon:'💸',target:3,type:'sell',reward:75000},
+    {id:'sell5',name:'Mesin Uang',desc:'Jual 5 lukisan hari ini',icon:'🤑',target:5,type:'sell',reward:150000},
+    {id:'stroke200',name:'Goresan Seni',desc:'Buat 200 goresan kuas',icon:'🖌️',target:200,type:'stroke',reward:30000},
+    {id:'stroke500',name:'Tangan Emas',desc:'Buat 500 goresan kuas',icon:'✍️',target:500,type:'stroke',reward:80000},
+    {id:'museum1',name:'Kurator',desc:'Pajang 1 lukisan di museum',icon:'🏛️',target:1,type:'museum',reward:40000},
+    {id:'museum3',name:'Galeri Master',desc:'Pajang 3 lukisan di museum',icon:'🖼️',target:3,type:'museum',reward:120000},
+    {id:'color5',name:'Pelangi',desc:'Gunakan 5 warna berbeda',icon:'🌈',target:5,type:'color',reward:35000},
+    {id:'color10',name:'Master Warna',desc:'Gunakan 10 warna berbeda',icon:'🎨',target:10,type:'color',reward:90000},
+    {id:'brush3',name:'Multi Kuas',desc:'Gunakan 3 jenis kuas berbeda',icon:'🖊️',target:3,type:'brush',reward:45000},
+    {id:'earn100k',name:'Target 100K',desc:'Hasilkan total Rp 100.000',icon:'📈',target:100000,type:'earn',reward:50000},
+    {id:'earn500k',name:'Target 500K',desc:'Hasilkan total Rp 500.000',icon:'📊',target:500000,type:'earn',reward:200000},
+];
+function getTodayStr(){return new Date().toDateString();}
+function getQuests(){let q=JSON.parse(localStorage.getItem(QUEST_KEY));if(!q||q.date!==getTodayStr()){q=generateDailyQuests();localStorage.setItem(QUEST_KEY,JSON.stringify(q));}return q;}
+function generateDailyQuests(){const s=[...QUEST_TEMPLATES].sort(()=>Math.random()-0.5).slice(0,3);return{date:getTodayStr(),quests:s.map(t=>({...t,progress:0,claimed:false})),dailyEarnings:0};}
+function updateQuestProgress(type,amount){
+    const q=getQuests();let changed=false;
+    q.quests.forEach(quest=>{if(quest.type===type&&!quest.claimed){if(type==='earn'){q.dailyEarnings=(q.dailyEarnings||0)+amount;quest.progress=q.dailyEarnings;}else{quest.progress=(quest.progress||0)+amount;}changed=true;if(quest.progress>=quest.target&&!quest.claimed)showToast('Quest Selesai!','"'+quest.name+'" — Klaim hadiahmu!','gold','🎯',4000);}});
+    if(changed){localStorage.setItem(QUEST_KEY,JSON.stringify(q));renderQuests();}
+}
+function claimQuestReward(index){
+    const q=getQuests(),quest=q.quests[index];if(!quest||quest.claimed||quest.progress<quest.target)return;
+    quest.claimed=true;localStorage.setItem(QUEST_KEY,JSON.stringify(q));
+    const d=JSON.parse(localStorage.getItem(KEY));d.saldo+=quest.reward;localStorage.setItem(KEY,JSON.stringify(d));
+    playSFX('sfx-money');updateBalanceDisplay(d.saldo);
+    showToast('Hadiah Diterima!','+Rp '+quest.reward.toLocaleString('id-ID'),'success','🎁',4000);renderQuests();
+}
+function renderQuests(){
+    const q=getQuests(),list=document.getElementById('questList');list.innerHTML='';
+    q.quests.forEach((quest,i)=>{
+        const pct=Math.min(100,Math.floor((quest.progress/quest.target)*100)),done=quest.progress>=quest.target;
+        const el=document.createElement('div');el.className='quest-item'+(quest.claimed?' completed':'');
+        el.innerHTML='<div class="quest-icon">'+quest.icon+'</div><div class="quest-info"><div class="quest-name">'+quest.name+(quest.claimed?' ✅':'')+'</div><div class="quest-desc">'+quest.desc+'</div><div class="quest-progress-bar"><div class="quest-progress-fill" style="width:'+pct+'%"></div></div><div style="font-size:9px;opacity:0.5;margin-top:3px;">'+Math.min(quest.progress,quest.target)+'/'+quest.target+'</div></div>'+(quest.claimed?'<span class="quest-reward">Selesai</span>':(done?'<button class="quest-claim-btn" onclick="claimQuestReward('+i+')">Klaim</button>':'<span class="quest-reward">Rp '+(quest.reward/1000).toFixed(0)+'k</span>'));
+        list.appendChild(el);
+    });
+}
+
+const BANNERS={1:"https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=1000&auto=format&fit=crop",2:"https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=1000&auto=format&fit=crop",3:"https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1000&auto=format&fit=crop",4:"https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=1000&auto=format&fit=crop"};
+let bannerSlideInterval=null,bannerSlideIndex=0,bannerCurrentLayer=1;
+function getOwnedBannerIds(){const d=JSON.parse(localStorage.getItem(KEY));const ids=(d&&d.banners)?d.banners.slice():[];if(localStorage.getItem(CUSTOM_BANNER_KEY)&&!ids.includes('custom'))ids.push('custom');return ids;}
+function startBannerSlideshow(){stopBannerSlideshow();const owned=getOwnedBannerIds();if(owned.length<=1)return;if(!gameSettings.bannerAnim)return;bannerSlideIndex=0;const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.activeBanner){const idx=owned.indexOf(d.activeBanner);if(idx>=0)bannerSlideIndex=idx;}bannerSlideInterval=setInterval(()=>{if(!gameSettings.bannerAnim){stopBannerSlideshow();return;}const co=getOwnedBannerIds();if(co.length<=1){stopBannerSlideshow();return;}bannerSlideIndex=(bannerSlideIndex+1)%co.length;crossfadeBanner(co[bannerSlideIndex]);},5000);}
+function stopBannerSlideshow(){if(bannerSlideInterval){clearInterval(bannerSlideInterval);bannerSlideInterval=null;}}
+function crossfadeBanner(bannerId){const img1=document.getElementById('bannerImage'),img2=document.getElementById('bannerImage2'),header=document.querySelector('.header');const url=bannerId==='custom'?localStorage.getItem(CUSTOM_BANNER_KEY):BANNERS[bannerId];if(!url)return;header.classList.add('has-banner');if(bannerCurrentLayer===1){img2.src=url;img2.onload=function(){img2.classList.add('active');setTimeout(()=>{img1.classList.remove('active');},200);bannerCurrentLayer=2;};if(img2.complete&&img2.naturalWidth>0){img2.classList.add('active');setTimeout(()=>{img1.classList.remove('active');},200);bannerCurrentLayer=2;}}else{img1.src=url;img1.onload=function(){img1.classList.add('active');setTimeout(()=>{img2.classList.remove('active');},200);bannerCurrentLayer=1;};if(img1.complete&&img1.naturalWidth>0){img1.classList.add('active');setTimeout(()=>{img2.classList.remove('active');},200);bannerCurrentLayer=1;}}const d=JSON.parse(localStorage.getItem(KEY));if(d){d.activeBanner=bannerId;localStorage.setItem(KEY,JSON.stringify(d));updateCanvasWrapBanner();}}
+function getActiveBannerURL(){const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.activeBanner==='custom')return localStorage.getItem(CUSTOM_BANNER_KEY)||null;if(d&&d.activeBanner&&BANNERS[d.activeBanner])return BANNERS[d.activeBanner];return null;}
+function updateCanvasWrapBanner(){const url=getActiveBannerURL(),wb=document.getElementById('canvasWrapBanner'),ph=document.getElementById('canvasPlaceholder');if(url){wb.src=url;wb.classList.add('active');ph.classList.add('hidden');}else{wb.src="";wb.classList.remove('active');ph.classList.remove('hidden');}}
+function buyBanner(id){const d=JSON.parse(localStorage.getItem(KEY));if(!d.banners)d.banners=[];if(d.banners.includes(id)){d.activeBanner=id;localStorage.setItem(KEY,JSON.stringify(d));applyBanner(id);updateInventoryUI();renderMuseum();updateCanvasWrapBanner();restartBannerSlideshow();return;}if(d.saldo<500000){showToast('Saldo Kurang!','Harga Rp 500.000','error','❌');return;}d.saldo-=500000;d.banners.push(id);d.activeBanner=id;localStorage.setItem(KEY,JSON.stringify(d));playSFX('sfx-money');applyBanner(id);updateBalanceDisplay(d.saldo);updateInventoryUI();renderMuseum();updateCanvasWrapBanner();restartBannerSlideshow();showToast('Banner Dibeli!','Banner baru telah terpasang','success','🏞️');}
+function applyBanner(id){const img1=document.getElementById('bannerImage'),img2=document.getElementById('bannerImage2'),header=document.querySelector('.header');img2.classList.remove('active');img2.src='';bannerCurrentLayer=1;const url=id==='custom'?localStorage.getItem(CUSTOM_BANNER_KEY):(id&&BANNERS[id]?BANNERS[id]:null);if(url){img1.src=url;img1.classList.add('active');header.classList.add('has-banner');}else{img1.src='';img1.classList.remove('active');header.classList.remove('has-banner');}}
+function restartBannerSlideshow(){stopBannerSlideshow();const owned=getOwnedBannerIds();if(owned.length>1&&gameSettings.bannerAnim)startBannerSlideshow();}
+
+let gameSettings={isMuted:false,resolution:"High",bannerAnim:true};
+// gameSettings akan di-reload dari IDB cache setelah preload di window.onload
+function toggleSettings(){const modal=document.getElementById('settingsModal');modal.style.display=modal.style.display==='flex'?'none':'flex';updateSettingsUI();}
+function updateSettingsUI(){document.getElementById('muteBtn').innerText=gameSettings.isMuted?"Mute":"Aktif";document.getElementById('muteBtn').style.background=gameSettings.isMuted?"var(--danger)":"var(--success)";document.getElementById('resBtn').innerText=gameSettings.resolution;document.getElementById('resBtn').style.background=gameSettings.resolution==="High"?"var(--accent)":"var(--info)";document.getElementById('bannerAnimBtn').innerText=gameSettings.bannerAnim?"Aktif":"Mati";document.getElementById('bannerAnimBtn').style.background=gameSettings.bannerAnim?"var(--success)":"var(--danger)";}
+function toggleMute(){gameSettings.isMuted=!gameSettings.isMuted;saveSettingsData();updateSettingsUI();}
+function toggleResolution(){gameSettings.resolution=gameSettings.resolution==="High"?"Low":"High";saveSettingsData();updateSettingsUI();if(currentActiveCanvas)setupCanvasSize(currentActiveCanvas);}
+function toggleBannerAnim(){gameSettings.bannerAnim=!gameSettings.bannerAnim;saveSettingsData();updateSettingsUI();if(gameSettings.bannerAnim){restartBannerSlideshow();showToast('Animasi Aktif','Banner berganti otomatis','success','🏞️');}else{stopBannerSlideshow();showToast('Animasi Mati','Banner tidak berganti','info','⏸️');}}
+function saveSettingsData(){localStorage.setItem(SETTINGS_KEY,JSON.stringify(gameSettings));}
+function switchShopTab(tabName,btn){document.querySelectorAll('.shop-tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.shop-tab-content').forEach(c=>c.classList.remove('active'));btn.classList.add('active');document.getElementById('tab-'+tabName).classList.add('active');}
+function buySupply(type){const d=JSON.parse(localStorage.getItem(KEY));if(!d.supplies)d.supplies={};const prices={premium:300000,gradient:250000,goldpalette:400000};if(d.supplies[type]){showToast('Sudah Dimiliki','Item sudah ada','info','ℹ️');return;}if(d.saldo<prices[type]){showToast('Saldo Kurang!','Harga Rp '+(prices[type]/1000).toFixed(0)+'rb','error','❌');return;}d.saldo-=prices[type];d.supplies[type]=true;localStorage.setItem(KEY,JSON.stringify(d));playSFX('sfx-money');updateBalanceDisplay(d.saldo);updateInventoryUI();updateGoldPaletteUI();showToast('Item Dibeli!',type+' berhasil dibeli','success','🛒');}
+function updateGoldPaletteUI(){const d=JSON.parse(localStorage.getItem(KEY)),palette=document.getElementById('mainPalette');if(!d||!palette)return;if(d.supplies&&d.supplies.goldpalette)palette.classList.add('gold-mode');else palette.classList.remove('gold-mode');}
+
+// ===== IMPROVED RAIN SYSTEM =====
+const rainCanvas2=document.getElementById('rainCanvas');
+const rCtx=rainCanvas2.getContext('2d');
+let drops=[],splashes=[],isRaining=false,rainAnimFrame=null;
+
+function initRain(){
+    rainCanvas2.width=window.innerWidth;rainCanvas2.height=window.innerHeight;
+    drops=[];splashes=[];
+    for(let i=0;i<220;i++){
+        drops.push({
+            x:Math.random()*rainCanvas2.width,
+            y:Math.random()*rainCanvas2.height*2-rainCanvas2.height,
+            len:Math.random()*25+12,
+            vel:Math.random()*14+8,
+            thickness:Math.random()*1.8+0.3,
+            wind:1.5+Math.random()*2,
+            opacity:Math.random()*0.5+0.2
+        });
+    }
+}
+
+function drawRain(){
+    if(!isRaining){rainAnimFrame=null;return;}
+    rCtx.clearRect(0,0,rainCanvas2.width,rainCanvas2.height);
+
+    // Draw rain drops with wind angle
+    drops.forEach(d=>{
+        rCtx.strokeStyle='rgba(180,200,225,'+d.opacity+')';
+        rCtx.lineWidth=d.thickness;
+        rCtx.lineCap='round';
+        rCtx.beginPath();
+        rCtx.moveTo(d.x,d.y);
+        rCtx.lineTo(d.x+d.wind*2,d.y+d.len);
+        rCtx.stroke();
+        d.y+=d.vel;
+        d.x+=d.wind;
+        if(d.y>rainCanvas2.height){
+            // Create splash at bottom
+            if(Math.random()>0.7){
+                splashes.push({x:d.x,y:rainCanvas2.height-5,life:0,maxLife:12+Math.random()*8,size:d.thickness*2});
+            }
+            d.y=-d.len-Math.random()*200;
+            d.x=Math.random()*rainCanvas2.width;
+        }
+        if(d.x>rainCanvas2.width+20)d.x=-20;
+    });
+
+    // Draw splash effects
+    for(let i=splashes.length-1;i>=0;i--){
+        const s=splashes[i];
+        s.life++;
+        const progress=s.life/s.maxLife;
+        if(progress>=1){splashes.splice(i,1);continue;}
+        const alpha=0.5*(1-progress);
+        rCtx.strokeStyle='rgba(200,215,235,'+alpha+')';
+        rCtx.lineWidth=0.8;
+        // Splash ring
+        rCtx.beginPath();
+        rCtx.ellipse(s.x,s.y,s.size*(1+progress*4),s.size*(0.3+progress),0,0,Math.PI*2);
+        rCtx.stroke();
+        // Small upward droplets
+        if(progress<0.5){
+            for(let j=0;j<3;j++){
+                const angle=-Math.PI/4-Math.random()*Math.PI/2;
+                const dist=progress*15;
+                rCtx.fillStyle='rgba(200,215,235,'+(alpha*0.8)+')';
+                rCtx.beginPath();
+                rCtx.arc(s.x+Math.cos(angle)*dist*(j+1)*0.7,s.y+Math.sin(angle)*dist*(j+1)*0.7,0.8,0,Math.PI*2);
+                rCtx.fill();
+            }
+        }
+    }
+
+    // Mist at bottom
+    const mistGrad=rCtx.createLinearGradient(0,rainCanvas2.height-100,0,rainCanvas2.height);
+    mistGrad.addColorStop(0,'rgba(140,160,185,0)');
+    mistGrad.addColorStop(1,'rgba(140,160,185,0.06)');
+    rCtx.fillStyle=mistGrad;
+    rCtx.fillRect(0,rainCanvas2.height-100,rainCanvas2.width,100);
+
+    rainAnimFrame=requestAnimationFrame(drawRain);
+}
+
+function triggerLightning(){
+    const light=document.getElementById('lightning');
+    // Multi-flash pattern
+    light.style.opacity='0.6';
+    setTimeout(()=>{light.style.opacity='0';},60);
+    setTimeout(()=>{light.style.opacity='0.8';},130);
+    setTimeout(()=>{light.style.opacity='0';},200);
+    if(Math.random()>0.5){
+        setTimeout(()=>{light.style.opacity='0.4';},400);
+        setTimeout(()=>{light.style.opacity='0';},480);
+    }
+}
+
+let lightningInterval=null;
+function startLightning(){
+    if(lightningInterval)clearInterval(lightningInterval);
+    lightningInterval=setInterval(()=>{
+        if(!isRaining){clearInterval(lightningInterval);lightningInterval=null;return;}
+        if(Math.random()>0.6) triggerLightning();
+    },4000+Math.random()*6000);
+    // First lightning sooner
+    setTimeout(()=>{if(isRaining)triggerLightning();},2000);
+}
+
+function startRainSession(){
+    if(isRaining)return;
+    isRaining=true;
+    document.body.classList.add('storm-mode');
+    document.getElementById('stormOverlay').classList.add('active');
+    rainCanvas2.classList.add('active');
+    initRain();
+    drawRain();
+    startLightning();
+    // Rain lasts 90-180 seconds
+    const duration=90000+Math.random()*90000;
+    setTimeout(()=>{stopRainSession();},duration);
+}
+
+function stopRainSession(){
+    isRaining=false;
+    document.body.classList.remove('storm-mode');
+    document.getElementById('stormOverlay').classList.remove('active');
+    rainCanvas2.classList.remove('active');
+    if(lightningInterval){clearInterval(lightningInterval);lightningInterval=null;}
+    if(rainAnimFrame){cancelAnimationFrame(rainAnimFrame);rainAnimFrame=null;}
+    drops=[];splashes=[];
+}
+
+setInterval(()=>{if(!isRaining&&Math.random()>0.7)startRainSession();},60000);
+
+const EXTRA_COLORS={
+    nature:["#064e3b","#065f46","#047857","#059669","#10b981","#34d399","#6ee7b7","#a7f3d0","#bbf7d0","#86efac","#4ade80","#22c55e"],
+    ocean:["#0c4a6e","#075985","#0369a1","#0284c7","#0ea5e9","#38bdf8","#7dd3fc","#bae6fd","#312e81","#4338ca","#6366f1","#818cf8"],
+    earth:["#451a03","#78350f","#92400e","#b45309","#d97706","#f59e0b","#fbbf24","#fcd34d","#713f12","#a16207","#854d0e","#ca8a04"],
+    candy:["#831843","#9d174d","#be185d","#db2777","#f472b6","#fb7185","#fda4af","#fecdd3","#f43f5e","#fb923c","#fbbf24","#a3e635"],
+    pastel:["#fce7f3","#fdf2f8","#f0abfc","#e879f9","#d8b4fe","#c4b5fd","#a5f3fc","#bbf7d0","#fed7aa","#fef08a","#fbcfe8","#bfdbfe"],
+    dark:["#020617","#0f172a","#1e293b","#1a1a2e","#16213e","#0f3460","#162032","#0d1b2a","#1b1b2f","#2d1b69","#1a0a2e","#0a0a0f"],
+    fire:["#7f1d1d","#991b1b","#b91c1c","#dc2626","#ef4444","#f97316","#fb923c","#fed7aa","#fca5a5","#fecaca","#fdba74","#fde68a"],
+    metallic:["#e5e7eb","#d1d5db","#9ca3af","#6b7280","#374151","#fbbf24","#f59e0b","#d97706","#7dd3fc","#93c5fd","#c4b5fd","#f0abfc"]
+};
+function initExtendedPalette(){
+    const sections={
+        nature:document.getElementById('natureColors'),
+        ocean:document.getElementById('oceanColors'),
+        earth:document.getElementById('earthColors'),
+        candy:document.getElementById('candyColors'),
+        pastel:document.getElementById('pastelColors'),
+        dark:document.getElementById('darkColors'),
+        fire:document.getElementById('fireColors'),
+        metallic:document.getElementById('metallicColors')
+    };
+    for(let key in EXTRA_COLORS){
+        if(!sections[key]) continue;
+        EXTRA_COLORS[key].forEach(color=>{
+            const btn=document.createElement('div');
+            btn.className='color-btn';
+            btn.style.background=color;
+            btn.onclick=()=>{pick(color);closeColorModal();};
+            sections[key].appendChild(btn);
+        });
+    }
+}
+function openColorModal(){document.getElementById('colorModal').style.display='flex';}
+function closeColorModal(){document.getElementById('colorModal').style.display='none';}
+function updateSizeIndicator(val){document.getElementById('sizeDisplay').innerText=val;}
+function playSFX(id){if(gameSettings.isMuted)return;const sfx=document.getElementById(id);if(sfx){sfx.currentTime=0;sfx.play().catch(e=>{});}}
+
+document.addEventListener('click',(e)=>{if(e.target.tagName==='BUTTON'||e.target.closest('.brush-item')||e.target.closest('.color-btn')||e.target.closest('.gift-float')||e.target.closest('.settings-float')||e.target.closest('.message-float'))playSFX('sfx-click');});
+
+let painting=false,usedColors=new Set(),strokes=0,points=[],lastPrice=0,activeMuseumIndex=-1;
+let visitorActive=false,currentBrush='normal',usedBrushes=new Set(['normal']);
+let historyStep=[],currentActiveCanvas=null;
+const PRICES={square:50000,horizontal:100000,vertical:200000};
+let startX,startY,snapshot;
+let isDay=false;
+const cycleDuration=3*60*1000;
+
+function toggleDayNight(){isDay=!isDay;const ts=document.getElementById('timeStatus');if(isDay){document.body.classList.add('day-mode');ts.innerText="Siang";ts.style.color="#ea580c";}else{document.body.classList.remove('day-mode');ts.innerText="Malam";ts.style.color="#3b82f6";}}
+setInterval(toggleDayNight,cycleDuration);
+
+function claimDailyGift(){
+    const d=JSON.parse(localStorage.getItem(KEY));if(!d)return;
+    const today=new Date().toDateString();
+    if(d.lastGiftDate===today){showToast('Sudah Diklaim','Kembali besok ya!','info','📦');return;}
+    playSFX('sfx-whistle');
+    const isMoney=Math.random()>0.4;let rewardMsg="";
+    if(isMoney){const money=Math.floor(Math.random()*(500000-25000+1))+25000;d.saldo+=money;rewardMsg='Selamat! Hadiah Rp '+money.toLocaleString('id-ID')+'!';}
+    else{const types=['square','horizontal','vertical'];const rt=types[Math.floor(Math.random()*types.length)];d.inventory[rt]=(d.inventory[rt]||0)+1;rewardMsg='Selamat! Hadiah 1 Kanvas '+rt.toUpperCase()+'!';}
+    d.lastGiftDate=today;localStorage.setItem(KEY,JSON.stringify(d));
+    document.getElementById('rewardText').innerText=rewardMsg;document.getElementById('rewardModal').style.display='flex';
+    playSFX('sfx-money');updateBalanceDisplay(d.saldo);updateInventoryUI();
+}
+function closeReward(){document.getElementById('rewardModal').style.display='none';}
+
+let currentStep=0;
+const tutorialSteps=[
+    {emoji:"👋",text:"Halo bos! Toko senimu sudah siap. Mari pelajari dasar-dasarnya!",focusId:"tutorial-header"},
+    {emoji:"📊",text:"Lihat statistik tokomu di panel Stats.",focusId:"tutorial-stats"},
+    {emoji:"📜",text:"Selesaikan Quest Harian untuk bonus uang!",focusId:"tutorial-quest"},
+    {emoji:"🛒",text:"Gunakan menu Toko untuk membeli kanvas, banner, dan supplies.",focusId:"tutorial-shop"},
+    {emoji:"🖼️",text:"Klik 'Pakai' untuk memasang kanvas di meja lukis.",focusId:"canvasSelector"},
+    {emoji:"🖌️",text:"Pilih jenis kuas, warna, dan ukuran di panel alat.",focusId:"tutorial-tools"},
+    {emoji:"💰",text:"Jual lukisanmu atau tunggu tamu datang menawar!",focusId:"tutorial-actions"},
+    {emoji:"🏛️",text:"Pajang lukisan di Museum untuk keuntungan pasif.",focusId:"tutorial-museum"},
+    {emoji:"✨",text:"Selamat berkarya! Jadilah pelukis terkaya!",focusId:null}
+];
+function startTutorial(){currentStep=0;document.getElementById('tutorialOverlay').style.display='block';showStep();}
+function showStep(){const pop=document.getElementById('tutorialPopup'),txt=document.getElementById('tutorialText'),emo=document.getElementById('tutorialEmoji');document.querySelectorAll('.tutorial-focus').forEach(el=>el.classList.remove('tutorial-focus'));const step=tutorialSteps[currentStep];emo.innerText=step.emoji;txt.innerText=step.text;if(step.focusId){const target=document.getElementById(step.focusId);if(target){target.classList.add('tutorial-focus');target.scrollIntoView({behavior:'smooth',block:'center'});}}pop.classList.add('active');}
+function nextTutorial(){currentStep++;if(currentStep<tutorialSteps.length)showStep();else{document.getElementById('tutorialPopup').classList.remove('active');document.getElementById('tutorialOverlay').style.display='none';document.querySelectorAll('.tutorial-focus').forEach(el=>el.classList.remove('tutorial-focus'));const d=JSON.parse(localStorage.getItem(KEY));if(d){d.tutorialDone=true;localStorage.setItem(KEY,JSON.stringify(d));}}}
+
+window.onload=async ()=>{
+    // Preload semua data dari IndexedDB ke cache sebelum game dimulai
+    await _preloadCacheFromIDB();
+    // Reload gameSettings dari cache setelah IDB preload
+    const _savedSettings = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+    if(_savedSettings){ Object.assign(gameSettings, _savedSettings); }
+    if(gameSettings.bannerAnim===undefined) gameSettings.bannerAnim=true;
+    initExtendedPalette();initRain();updateSettingsUI();
+    window.addEventListener('resize',()=>{rainCanvas2.width=window.innerWidth;rainCanvas2.height=window.innerHeight;});
+    setTimeout(()=>{
+        const splash=document.getElementById('splash-screen');splash.style.opacity='0';splash.style.visibility='hidden';
+        const d=JSON.parse(localStorage.getItem(KEY));
+        if(d){loadGame();document.getElementById('game').classList.add('content-visible');}
+        else{document.getElementById('register').classList.add('content-visible');}
+    },2500);
+};
+
+function showReputationUpgrade(rankName,emoji){const notif=document.getElementById('reputationNotif');document.getElementById('reputationEmoji').innerText=emoji;document.getElementById('reputationText').innerHTML='Selamat! Reputasi naik: <b>'+rankName+'</b>.<br>Teruslah berkarya!';notif.classList.add('active');}
+function closeRepNotif(){document.getElementById('reputationNotif').classList.remove('active');}
+function updateBadge(saldo){const d=JSON.parse(localStorage.getItem(KEY))||{lastRank:"Pemula"};const badgeEl=document.getElementById('badgeDisplay');let currentRank="Pemula",emoji="🎗";if(saldo>=1e9){currentRank="Legenda";emoji="🏆";}else if(saldo>=1e8){currentRank="Emas";emoji="🥇";}else if(saldo>=1e7){currentRank="Perak";emoji="🥈";}else if(saldo>=1e6){currentRank="Perunggu";emoji="🥉";}badgeEl.innerText=emoji;if(currentRank!==d.lastRank){showReputationUpgrade(currentRank,emoji);badgeEl.classList.remove('upgraded');void badgeEl.offsetWidth;badgeEl.classList.add('upgraded');d.lastRank=currentRank;localStorage.setItem(KEY,JSON.stringify(d));}}
+
+function buyCanvas(type){const d=JSON.parse(localStorage.getItem(KEY));if(d.saldo<PRICES[type]){showToast('Saldo Kurang!','Harga Rp '+(PRICES[type]/1000).toFixed(0)+'rb','error','❌');return;}d.saldo-=PRICES[type];d.inventory[type]=(d.inventory[type]||0)+1;localStorage.setItem(KEY,JSON.stringify(d));updateBalanceDisplay(d.saldo);updateInventoryUI();showToast('Kanvas Dibeli!','+1 Kanvas '+type,'success','🖼️');}
+function useCanvasFromInv(type){const d=JSON.parse(localStorage.getItem(KEY));if(!d.inventory[type]||d.inventory[type]<=0){showToast('Stok Habis!','Beli kanvas dulu','error','❌');return;}if(currentActiveCanvas){showToast('Kanvas Aktif!','Selesaikan dulu','info','ℹ️');return;}d.inventory[type]--;localStorage.setItem(KEY,JSON.stringify(d));currentActiveCanvas=type;setupCanvasSize(type);updateInventoryUI();showToast('Kanvas Terpasang!','Kanvas '+type+' siap dilukis','success','🎨');}
+
+function updateInventoryUI(){
+    const d=JSON.parse(localStorage.getItem(KEY));if(!d)return;
+    document.getElementById('stock-square').innerText='Milik: '+(d.inventory.square||0);
+    document.getElementById('stock-horizontal').innerText='Milik: '+(d.inventory.horizontal||0);
+    document.getElementById('stock-vertical').innerText='Milik: '+(d.inventory.vertical||0);
+    if(!d.supplies)d.supplies={};
+    ['premium','gradient','goldpalette'].forEach(s=>{const el=document.getElementById('stock-'+s);if(el){el.innerText=d.supplies[s]?'Dimiliki':'Belum';el.style.color=d.supplies[s]?'var(--success)':'#64748b';}});
+    for(let i=1;i<=4;i++){const statusEl=document.getElementById('banner-status-'+i),btnEl=document.getElementById('btn-banner-'+i);if(d.banners&&d.banners.includes(i)){statusEl.innerText=d.activeBanner===i?"Aktif":"Milik";statusEl.style.color=d.activeBanner===i?"var(--accent)":"var(--success)";btnEl.innerText=d.activeBanner===i?"Lepas":"Pakai";btnEl.style.background=d.activeBanner===i?"var(--danger)":"var(--info)";const bid=i;btnEl.onclick=()=>{const dd=JSON.parse(localStorage.getItem(KEY));if(dd.activeBanner===bid)dd.activeBanner=null;else dd.activeBanner=bid;localStorage.setItem(KEY,JSON.stringify(dd));applyBanner(dd.activeBanner);updateInventoryUI();renderMuseum();updateCanvasWrapBanner();restartBannerSlideshow();};}}
+    const selector=document.getElementById('canvasSelector');selector.innerHTML="";
+    if(currentActiveCanvas){selector.innerHTML='<div class="btn-small" style="background:var(--accent);color:white;border:1px solid white;">🎨 Melukis: '+currentActiveCanvas.toUpperCase()+'</div>';canvas.style.display="block";document.getElementById('noCanvasMsg').style.display="none";}
+    else{canvas.style.display="none";document.getElementById('noCanvasMsg').style.display="block";let hasStock=false;for(let type in d.inventory){if(d.inventory[type]>0){hasStock=true;const btn=document.createElement('button');btn.className="btn-small";btn.style.background="var(--success)";btn.innerHTML='Pakai '+type.toUpperCase();btn.onclick=()=>useCanvasFromInv(type);selector.appendChild(btn);}}if(!hasStock)selector.innerHTML='<div style="font-size:11px;opacity:0.6;">Beli kanvas untuk mulai melukis</div>';}
+    updateGoldPaletteUI();updateCanvasWrapBanner();
+}
+
+function setupCanvasSize(type){const scale=gameSettings.resolution==="High"?1:0.6;if(type==='square'){canvas.width=380*scale;canvas.height=380*scale;}else if(type==='horizontal'){canvas.width=420*scale;canvas.height=280*scale;}else if(type==='vertical'){canvas.width=280*scale;canvas.height=420*scale;}canvas.style.width=type==='square'?'380px':(type==='horizontal'?'420px':'280px');canvas.style.height=type==='square'?'380px':(type==='horizontal'?'280px':'420px');clearCanvas();}
+function consumeCanvas(){currentActiveCanvas=null;updateInventoryUI();}
+
+function setBrush(type,el){
+    if(type==='gradient'){const d=JSON.parse(localStorage.getItem(KEY));if(!d.supplies||!d.supplies.gradient){showToast('Perlu Gradient Kit!','Beli di tab Supplies','error','🔒');return;}}
+    currentBrush=type;usedBrushes.add(type);
+    document.querySelectorAll('.brush-item').forEach(item=>item.classList.remove('active'));el.classList.add('active');
+    document.getElementById('gradientRow').style.display=type==='gradient'?'flex':'none';
+    const q=getQuests();q.quests.forEach(quest=>{if(quest.type==='brush'&&!quest.claimed){quest.progress=usedBrushes.size;}});localStorage.setItem(QUEST_KEY,JSON.stringify(q));renderQuests();
+}
+
+// ===== VISITORS - NO toast notification when arriving =====
+const visitors=["🤠","👩‍🎨","🧐","🧔","👵","👶","🧕","🧛","🧟","🤡","🤖"];
+const compliments=["Wah, bagus! Tawar Rp","Estetik! Beli Rp","Indah. Bayar Rp","Masterpiece! Rp","Bakat unik. Rp"];
+const insults=["Murahan. Sini Rp","Berantakan! Rp","Hanya layak Rp","Ini seni? Hah! Rp","Cuma laku Rp"];
+const rudeComments=["Ini seni? Lebih mirip coretan anak TK! 😤","Aduh mataku sakit lihat lukisan ini! 🤮","Mending jadi tukang sapu daripada pelukis! 💀","Lukisan ini tidak layak jadi alas kaki! 🤣","Senimu payah! Kucing melukis lebih bagus! 😾","Aku datang jauh-jauh untuk melihat INI?! 😡","Buat apa buka studio? Tutup saja! 🗑️","Ini bukan seni, ini bencana visual! 🙈"];
+
+function triggerVisitor(){
+    if(visitorActive||strokes<20||!currentActiveCanvas)return;
+    visitorActive=true;
+    const roll=Math.random();
+    if(roll<0.25)triggerRudeVisitor();
+    else if(roll<0.40)triggerFruitThrower();
+    else triggerNormalVisitor();
+}
+
+function triggerNormalVisitor(){
+    playSFX('sfx-whistle');
+    const isGood=Math.random()>0.4;
+    const emoji=visitors[Math.floor(Math.random()*visitors.length)];
+    const text=isGood?compliments[Math.floor(Math.random()*compliments.length)]:insults[Math.floor(Math.random()*insults.length)];
+    const base=calculatePrice();const multiplier=isGood?(0.8+Math.random()*1.5):(Math.random()*0.4);const offer=Math.floor(base*multiplier);
+    document.getElementById('vEmoji').innerText=emoji;
+    document.getElementById('vText').innerHTML='<strong>'+emoji+' Tamu:</strong><br>"'+text+offer.toLocaleString('id-ID')+'"';
+    document.getElementById('visitorActions').style.display='flex';
+    document.getElementById('visitorNotif').classList.add("show");
+    document.getElementById('vAccept').onclick=()=>{
+        playSFX('sfx-money');const d=JSON.parse(localStorage.getItem(KEY));d.saldo+=offer;localStorage.setItem(KEY,JSON.stringify(d));
+        updateBalanceDisplay(d.saldo);recordSale(offer);addIncomeLog(offer);updateQuestProgress('sell',1);updateQuestProgress('earn',offer);drawIncomeChart();
+        clearCanvas();consumeCanvas();hideVisitor();showToast('Terjual!','+Rp '+offer.toLocaleString('id-ID'),'success','💰');
+    };
+    document.getElementById('vReject').onclick=()=>{hideVisitor();};
+}
+
+function triggerRudeVisitor(){
+    playSFX('sfx-boo');
+    const emoji=visitors[Math.floor(Math.random()*visitors.length)];
+    const comment=rudeComments[Math.floor(Math.random()*rudeComments.length)];
+    document.getElementById('vEmoji').innerText=emoji;
+    document.getElementById('vText').innerHTML='<strong>'+emoji+' Tamu Kasar:</strong><br>"'+comment+'"';
+    document.getElementById('visitorActions').style.display='none';
+    document.getElementById('visitorNotif').classList.add("show");
+    setTimeout(()=>{hideVisitor();},3500);
+}
+
+function triggerFruitThrower(){
+    playSFX('sfx-boo');
+    const emoji=visitors[Math.floor(Math.random()*visitors.length)];
+    const isBanana=Math.random()>0.5;const fruitEmoji=isBanana?'🍌':'🍅';const fruitColor=isBanana?'#fde047':'#ef4444';
+    const throwComment=isBanana?"Ini pantas dilempari pisang! 🍌💨":"Tomat untuk lukisan jelekmu! 🍅💨";
+    document.getElementById('vEmoji').innerText=emoji;
+    document.getElementById('vText').innerHTML='<strong>'+emoji+' Tamu Jahat:</strong><br>"'+throwComment+'"';
+    document.getElementById('visitorActions').style.display='none';
+    document.getElementById('visitorNotif').classList.add("show");
+    setTimeout(()=>{throwFruitAtCanvas(fruitEmoji,fruitColor);},800);
+    if(Math.random()>0.5)setTimeout(()=>{throwFruitAtCanvas(fruitEmoji,fruitColor);},1400);
+    setTimeout(()=>{hideVisitor();},4000);
+}
+
+function hideVisitor(){document.getElementById("visitorNotif").classList.remove("show");setTimeout(()=>{visitorActive=false;},1000);}
+
+setInterval(()=>{if(document.getElementById("game").style.display==="block")triggerVisitor();},30000);
+setInterval(()=>{if(localStorage.getItem(MUSEUM_KEY))renderMuseum();},10000);
+setInterval(()=>{let m=JSON.parse(localStorage.getItem(MUSEUM_KEY))||[];if(m.length>0){let changed=false;const addValues=[1,2,5,7];m=m.map(item=>{if(Math.random()>0.3){item.likes=(item.likes||0)+addValues[Math.floor(Math.random()*addValues.length)];changed=true;}return item;});if(changed){localStorage.setItem(MUSEUM_KEY,JSON.stringify(m));renderMuseum();}}},30000);
+
+function createShop(){
+    if(!shopName.value)return showToast('Error','Masukkan nama toko!','error','❌');
+    localStorage.setItem(KEY,JSON.stringify({shop:shopName.value.toUpperCase(),saldo:0,inventory:{square:1,horizontal:0,vertical:0},banners:[],activeBanner:null,supplies:{},lastRank:"Pemula",lastGiftDate:"",tutorialDone:false}));
+    loadGame();document.getElementById('register').style.opacity='0';
+    setTimeout(()=>{document.getElementById('register').style.display='none';document.getElementById('game').style.display='block';setTimeout(()=>{document.getElementById('game').classList.add('content-visible');startTutorial();},50);},500);
+}
+
+function loadGame(){
+    const d=JSON.parse(localStorage.getItem(KEY));if(!d)return;
+    if(!d.inventory){d.inventory={square:0,horizontal:0,vertical:0};localStorage.setItem(KEY,JSON.stringify(d));}
+    if(!d.banners){d.banners=[];d.activeBanner=null;localStorage.setItem(KEY,JSON.stringify(d));}
+    if(!d.supplies){d.supplies={};localStorage.setItem(KEY,JSON.stringify(d));}
+    document.getElementById('register').style.display="none";document.getElementById('game').style.display="block";
+    shopTitle.innerText=d.shop;updateBalanceDisplay(d.saldo);
+    renderMuseum();updateInventoryUI();applyBanner(d.activeBanner);
+    updateStatsUI();renderQuests();updateGoldPaletteUI();updateCanvasWrapBanner();
+    updateProfilePicUI();updateMessageBadge();restartBannerSlideshow();startCollectorScheduler();
+    renderLeaderboard();
+    // Refresh leaderboard label every minute
+    setInterval(renderLeaderboard, 60000);
+}
+
+function updateBalanceDisplay(val){const el=document.getElementById("saldo");el.innerText=val.toLocaleString("id-ID");el.parentElement.classList.remove('pop');void el.parentElement.offsetWidth;el.parentElement.classList.add('pop');updateBadge(val);renderLeaderboard();}
+function getPos(e){const r=canvas.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:(t.clientX-r.left)*(canvas.width/r.width),y:(t.clientY-r.top)*(canvas.height/r.height)};}
+
+function startPaint(e){if(!currentActiveCanvas)return;const p=getPos(e);startX=p.x;startY=p.y;if(currentBrush==='flood'){saveHistory();floodFill(Math.round(startX),Math.round(startY),colorPicker.value);return;}saveHistory();painting=true;ctx.beginPath();ctx.moveTo(startX,startY);snapshot=ctx.getImageData(0,0,canvas.width,canvas.height);}
+
+function endPaint(e){
+    if(currentBrush==='gradient'&&painting&&snapshot){
+        const p=e&&(e.changedTouches?getPos({touches:e.changedTouches}):getPos(e));
+        if(p){ctx.putImageData(snapshot,0,0);const grad=ctx.createLinearGradient(startX,startY,p.x,p.y);grad.addColorStop(0,document.getElementById('gradColor1').value);grad.addColorStop(1,document.getElementById('gradColor2').value);const size=brushSize.value*(gameSettings.resolution==="High"?1:0.6);ctx.strokeStyle=grad;ctx.lineWidth=size;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(startX,startY);ctx.lineTo(p.x,p.y);ctx.stroke();usedColors.add(document.getElementById('gradColor1').value);usedColors.add(document.getElementById('gradColor2').value);strokes+=5;}
+    }
+    painting=false;ctx.beginPath();
+}
+
+function saveHistory(){if(historyStep.length>20)historyStep.shift();historyStep.push({img:canvas.toDataURL(),strokes:strokes,points:[...points],usedColors:new Set(usedColors),usedBrushes:new Set(usedBrushes)});}
+
+// ===== LEADERBOARD SYSTEM =====
+const LEADERBOARD_KEY = "lukisanku_leaderboard_npc";
+
+const LB_NAMES = [
+    {name:"Studio Harmoni", emoji:"🎨"},
+    {name:"Galeri Nusantara", emoji:"🖼️"},
+    {name:"Toko Seniman Muda", emoji:"✨"},
+    {name:"Lukisan Abadi", emoji:"🏛️"},
+    {name:"Art Corner Bali", emoji:"🌺"},
+    {name:"Studio Mas Joko", emoji:"🎭"},
+    {name:"Kanvas Ajaib", emoji:"🌟"},
+    {name:"Pentas Warna", emoji:"🎪"},
+    {name:"Seni Rupa Digital", emoji:"💻"},
+    {name:"Karya Maestro", emoji:"👑"},
+];
+
+function getLeaderboardSeed() {
+    // Seed berdasarkan hari, bukan jam — jadi urutan berubah tiap hari
+    const d = new Date();
+    return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+}
+
+function seededRandom(seed, index) {
+    const x = Math.sin(seed * 9301 + index * 49297 + 233720) * 93942;
+    return x - Math.floor(x);
+}
+
+function generateNpcLeaderboard(seed) {
+    const npcData = JSON.parse(localStorage.getItem(LEADERBOARD_KEY)) || {};
+    if (npcData.seed === seed) return npcData.list;
+
+    // Generate NPC saldo berdasarkan seed hari ini
+    const npcs = LB_NAMES.map((npc, i) => {
+        const baseSaldo = Math.floor(seededRandom(seed, i) * 800000000) + 50000000;
+        return {
+            name: npc.name,
+            emoji: npc.emoji,
+            saldo: baseSaldo,
+            isNpc: true
+        };
+    });
+    const sorted = npcs.sort((a, b) => b.saldo - a.saldo);
+    localStorage.setItem(LEADERBOARD_KEY, JSON.stringify({seed, list: sorted}));
+    return sorted;
+}
+
+function renderLeaderboard() {
+    const lbList = document.getElementById('leaderboardList');
+    if (!lbList) return;
+    const d = JSON.parse(localStorage.getItem(KEY));
+    if (!d) return;
+
+    const seed = getLeaderboardSeed();
+    const npcs = generateNpcLeaderboard(seed);
+    const playerSaldo = d.saldo || 0;
+    const playerName = d.shopName || "Toko Kamu";
+
+    // Gabung player + NPC, sort berdasarkan saldo
+    const allEntries = [
+        ...npcs,
+        { name: playerName, emoji: "🧑‍🎨", saldo: playerSaldo, isNpc: false }
+    ].sort((a, b) => b.saldo - a.saldo);
+
+    const rankBadgeClass = (rank) => {
+        if (rank === 1) return 'gold';
+        if (rank === 2) return 'silver';
+        if (rank === 3) return 'bronze';
+        return '';
+    };
+    const rankEmoji = (rank) => {
+        if (rank === 1) return '🥇';
+        if (rank === 2) return '🥈';
+        if (rank === 3) return '🥉';
+        return rank;
+    };
+
+    lbList.innerHTML = '';
+    allEntries.forEach((entry, idx) => {
+        const rank = idx + 1;
+        const isMe = !entry.isNpc;
+        const item = document.createElement('div');
+        item.className = 'leaderboard-item' +
+            (rank === 1 ? ' rank-1' : rank === 2 ? ' rank-2' : rank === 3 ? ' rank-3' : '') +
+            (isMe ? ' is-me' : '');
+        item.style.animationDelay = (idx * 0.05) + 's';
+
+        const badgeCls = rankBadgeClass(rank);
+        const rankDisplay = rank <= 3 ? rankEmoji(rank) : rank;
+
+        item.innerHTML = `
+            <div class="lb-rank-badge ${badgeCls}">${rankDisplay}</div>
+            <div class="lb-avatar">${entry.emoji}</div>
+            <div class="lb-info">
+                <div class="lb-name">${entry.name}${isMe ? '<span class="lb-me-label">KAMU</span>' : ''}</div>
+                <div class="lb-badge">${getBadgeForSaldo(entry.saldo)} ${getRankNameForSaldo(entry.saldo)}</div>
+            </div>
+            <div class="lb-saldo">Rp ${formatShort(entry.saldo)}</div>
+            ${rank === 1 ? '<div class="lb-crown">👑</div>' : ''}
+        `;
+        lbList.appendChild(item);
+    });
+
+    // Update label
+    const d2 = new Date();
+    d2.setDate(d2.getDate() + 1);
+    d2.setHours(0,0,0,0);
+    const ms = d2 - Date.now();
+    const h = Math.floor(ms / 3600000);
+    const m = Math.floor((ms % 3600000) / 60000);
+    const lbLabel = document.getElementById('lbRefreshLabel');
+    if (lbLabel) lbLabel.textContent = 'Reset dalam ' + h + 'j ' + m + 'm';
+}
+
+function getBadgeForSaldo(saldo) {
+    if (saldo >= 1000000000) return '🏆';
+    if (saldo >= 100000000) return '🥇';
+    if (saldo >= 10000000) return '🥈';
+    if (saldo >= 1000000) return '🥉';
+    return '🎗';
+}
+function getRankNameForSaldo(saldo) {
+    if (saldo >= 1000000000) return 'Legenda';
+    if (saldo >= 100000000) return 'Emas';
+    if (saldo >= 10000000) return 'Perak';
+    if (saldo >= 1000000) return 'Perunggu';
+    return 'Pemula';
+}
+function undo(){if(historyStep.length===0)return;let last=historyStep.pop();let img=new Image();img.onload=function(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0);};img.src=last.img;strokes=last.strokes;points=last.points;usedColors=last.usedColors;usedBrushes=last.usedBrushes;}
+
+function floodFill(sx,sy,fillColor){const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);const data=imageData.data;function gpc(x,y){const i=(y*canvas.width+x)*4;return[data[i],data[i+1],data[i+2],data[i+3]];}function spc(x,y,c){const i=(y*canvas.width+x)*4;data[i]=c[0];data[i+1]=c[1];data[i+2]=c[2];data[i+3]=255;}function htr(hex){const r=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);return r?[parseInt(r[1],16),parseInt(r[2],16),parseInt(r[3],16)]:[0,0,0];}const tc=gpc(sx,sy);const rc=htr(fillColor);if(tc[0]===rc[0]&&tc[1]===rc[1]&&tc[2]===rc[2])return;const stack=[[sx,sy]];while(stack.length>0){const[x,y]=stack.pop();const cc=gpc(x,y);if(cc[0]===tc[0]&&cc[1]===tc[1]&&cc[2]===tc[2]&&cc[3]===tc[3]){spc(x,y,rc);if(x>0)stack.push([x-1,y]);if(x<canvas.width-1)stack.push([x+1,y]);if(y>0)stack.push([x,y-1]);if(y<canvas.height-1)stack.push([x,y+1]);}}ctx.putImageData(imageData,0,0);usedColors.add(fillColor);strokes+=10;}
+
+function draw(e){
+    if(!painting||!currentActiveCanvas||currentBrush==='flood')return;e.preventDefault();
+    const p=getPos(e);const size=brushSize.value*(gameSettings.resolution==="High"?1:0.6);const color=colorPicker.value;
+    ctx.globalCompositeOperation='source-over';ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=size;ctx.lineCap="round";ctx.lineJoin="round";
+    if(currentBrush==='gradient'){ctx.putImageData(snapshot,0,0);const grad=ctx.createLinearGradient(startX,startY,p.x,p.y);grad.addColorStop(0,document.getElementById('gradColor1').value);grad.addColorStop(1,document.getElementById('gradColor2').value);ctx.strokeStyle=grad;ctx.lineWidth=size;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(startX,startY);ctx.lineTo(p.x,p.y);ctx.stroke();return;}
+    if(['line','rect','circle'].includes(currentBrush)){ctx.putImageData(snapshot,0,0);ctx.beginPath();if(currentBrush==='line'){ctx.moveTo(startX,startY);ctx.lineTo(p.x,p.y);ctx.stroke();}else if(currentBrush==='rect'){ctx.strokeRect(startX,startY,p.x-startX,p.y-startY);}else if(currentBrush==='circle'){let r=Math.sqrt(Math.pow(startX-p.x,2)+Math.pow(startY-p.y,2));ctx.arc(startX,startY,r,0,2*Math.PI);ctx.stroke();}}
+    else{switch(currentBrush){case'normal':ctx.setLineDash([]);ctx.globalAlpha=1.0;ctx.lineTo(p.x,p.y);ctx.stroke();break;case'eraser':ctx.globalCompositeOperation='destination-out';ctx.beginPath();ctx.arc(p.x,p.y,size/2,0,Math.PI*2);ctx.fill();break;case'square-brush':ctx.setLineDash([]);ctx.lineCap="butt";ctx.lineTo(p.x,p.y);ctx.stroke();break;case'spray':for(let i=0;i<15;i++){ctx.fillRect(p.x+(Math.random()-0.5)*size*2,p.y+(Math.random()-0.5)*size*2,1,1);}break;case'ink':ctx.setLineDash([]);ctx.globalAlpha=0.8;ctx.lineTo(p.x,p.y);ctx.stroke();break;case'charcoal':ctx.globalAlpha=0.2;for(let i=0;i<5;i++){ctx.lineTo(p.x+Math.random()*2,p.y+Math.random()*2);ctx.stroke();}ctx.globalAlpha=1.0;break;case'marker':ctx.lineCap="square";ctx.globalAlpha=0.6;ctx.lineTo(p.x,p.y);ctx.stroke();ctx.globalAlpha=1.0;break;case'faded':ctx.globalAlpha=0.05;ctx.beginPath();ctx.arc(p.x,p.y,size/2,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1.0;break;case'dashed':ctx.setLineDash([size,size]);ctx.lineTo(p.x,p.y);ctx.stroke();break;case'bubble':ctx.beginPath();ctx.arc(p.x,p.y,size/2,0,Math.PI*2);ctx.stroke();break;case'star':ctx.save();ctx.translate(p.x,p.y);for(let i=0;i<5;i++){ctx.rotate(Math.PI/2.5);ctx.lineTo(0,size);}ctx.fill();ctx.restore();break;
+        case'watercolor':ctx.globalAlpha=0.08;for(let i=0;i<8;i++){const ox=(Math.random()-0.5)*size*1.5,oy=(Math.random()-0.5)*size*1.5;ctx.beginPath();ctx.arc(p.x+ox,p.y+oy,size*0.6+Math.random()*size*0.4,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1.0;break;
+        case'neon':ctx.shadowBlur=size*1.5;ctx.shadowColor=color;ctx.globalAlpha=0.9;ctx.lineTo(p.x,p.y);ctx.stroke();ctx.shadowBlur=0;break;
+        case'splatter':ctx.globalAlpha=0.7;for(let i=0;i<20;i++){const angle=Math.random()*Math.PI*2,dist=Math.random()*size*2.5;ctx.beginPath();ctx.arc(p.x+Math.cos(angle)*dist,p.y+Math.sin(angle)*dist,Math.random()*3+0.5,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1.0;break;
+        case'pencil':ctx.globalAlpha=0.45;ctx.lineWidth=size*0.5;for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(p.x+(i-1)*1.2+(Math.random()-0.5),p.y+(i-1)*0.8);ctx.lineTo(p.x+(i-1)*1.2+(Math.random()-0.5)+1,p.y+(i-1)*0.8+1);ctx.stroke();}ctx.lineTo(p.x,p.y);ctx.stroke();ctx.globalAlpha=1.0;break;
+        case'oil':ctx.setLineDash([]);ctx.globalAlpha=0.7;ctx.lineWidth=size*1.2;ctx.lineCap='round';ctx.lineTo(p.x,p.y);ctx.stroke();ctx.globalAlpha=0.2;ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=size*0.3;ctx.beginPath();ctx.moveTo(p.x-size*0.2,p.y-size*0.2);ctx.lineTo(p.x,p.y);ctx.stroke();ctx.strokeStyle=color;ctx.globalAlpha=1.0;break;
+        case'ribbon':ctx.globalAlpha=0.6;ctx.lineWidth=size*0.5;ctx.lineCap='round';const wv=Math.sin((p.x+p.y)*0.1)*size*0.5;ctx.lineTo(p.x+wv,p.y);ctx.stroke();ctx.globalAlpha=0.3;ctx.lineWidth=size*0.25;ctx.lineTo(p.x-wv,p.y);ctx.stroke();ctx.globalAlpha=1.0;break;
+        case'dots':ctx.globalAlpha=0.85;ctx.beginPath();ctx.arc(p.x,p.y,size/2.5,0,Math.PI*2);ctx.fill();if(Math.random()>0.5){const d2=size*1.8;ctx.globalAlpha=0.4;ctx.beginPath();ctx.arc(p.x+d2*(Math.random()-0.5),p.y+d2*(Math.random()-0.5),size/4,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1.0;break;
+        case'glitter':ctx.globalAlpha=0.9;for(let i=0;i<12;i++){const gx=p.x+(Math.random()-0.5)*size*2,gy=p.y+(Math.random()-0.5)*size*2,hs=`hsl(${Math.random()*360},100%,70%)`;ctx.beginPath();ctx.arc(gx,gy,Math.random()*2+0.5,0,Math.PI*2);ctx.fillStyle=hs;ctx.fill();}ctx.fillStyle=color;ctx.globalAlpha=1.0;break;
+        case'rough':ctx.globalAlpha=0.4;ctx.lineWidth=size*0.3;for(let i=0;i<6;i++){ctx.beginPath();ctx.moveTo(p.x+(Math.random()-0.5)*size,p.y+(Math.random()-0.5)*size);ctx.lineTo(p.x+(Math.random()-0.5)*size,p.y+(Math.random()-0.5)*size);ctx.stroke();}ctx.globalAlpha=1.0;break;
+        case'smudge':ctx.globalAlpha=0.06;for(let i=0;i<10;i++){const sx=p.x+(Math.random()-0.5)*size*2,sy=p.y+(Math.random()-0.5)*size*2;ctx.beginPath();ctx.arc(sx,sy,size*0.8,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1.0;break;}}
+    if(currentBrush!=='eraser'){usedColors.add(color);strokes++;}points.push(p);
+    updateQuestProgress('stroke',1);
+    const q=getQuests();q.quests.forEach(quest=>{if(quest.type==='color'&&!quest.claimed){quest.progress=usedColors.size;}});localStorage.setItem(QUEST_KEY,JSON.stringify(q));renderQuests();
+}
+
+function fillCanvas(){if(!currentActiveCanvas)return;saveHistory();ctx.setLineDash([]);ctx.fillStyle=colorPicker.value;ctx.fillRect(0,0,canvas.width,canvas.height);usedColors.add(colorPicker.value);strokes+=50;}
+function pick(c){colorPicker.value=c;}
+function clearCanvas(){ctx.setLineDash([]);ctx.globalAlpha=1.0;ctx.clearRect(0,0,canvas.width,canvas.height);usedColors.clear();usedBrushes.clear();usedBrushes.add('normal');strokes=0;points=[];historyStep=[];}
+
+function calculatePrice(){const area=points.length?(Math.max(...points.map(p=>p.x))-Math.min(...points.map(p=>p.x)))*(Math.max(...points.map(p=>p.y))-Math.min(...points.map(p=>p.y)))/100:0;const brushBonus=(usedBrushes.size-(usedBrushes.has('eraser')?1:0))*5000;const canvasBonus=currentActiveCanvas==='vertical'?50000:(currentActiveCanvas==='horizontal'?25000:0);const d=JSON.parse(localStorage.getItem(KEY));const supplyBonus=(d.supplies&&d.supplies.premium?20000:0)+(d.supplies&&d.supplies.goldpalette?30000:0);return Math.min(5000+(usedColors.size*12000)+(strokes*150)+area+brushBonus+canvasBonus+supplyBonus+(Math.random()*40000),10000000)|0;}
+
+function openSell(){if(!currentActiveCanvas)return showToast('Error','Pasang kanvas dulu!','error','❌');if(strokes<10)return showToast('Terlalu Simpel','Lukis lebih banyak dulu!','info','🖌️');lastPrice=calculatePrice();activeMuseumIndex=-1;priceText.innerText="Jual Rp "+lastPrice.toLocaleString("id-ID")+" ?";modalConfirmBtn.onclick=confirmSell;modal.style.display="flex";}
+function confirmSell(){playSFX('sfx-money');const d=JSON.parse(localStorage.getItem(KEY));d.saldo+=lastPrice;localStorage.setItem(KEY,JSON.stringify(d));updateBalanceDisplay(d.saldo);recordSale(lastPrice);addIncomeLog(lastPrice);updateQuestProgress('sell',1);updateQuestProgress('earn',lastPrice);drawIncomeChart();clearCanvas();consumeCanvas();closeModal();showToast('Lukisan Terjual!','+Rp '+lastPrice.toLocaleString('id-ID'),'success','💰',4000);}
+function closeModal(){modal.style.display="none";}
+function showFullImage(src){document.getElementById("fullImg").src=src;document.getElementById("previewOverlay").style.display="flex";}
+function closePreview(){document.getElementById("previewOverlay").style.display="none";}
+
+function saveToMuseum(){if(!currentActiveCanvas)return showToast('Error','Pasang kanvas dulu!','error','❌');if(strokes<10)return showToast('Terlalu Simpel','Lukis lebih banyak dulu!','info','🖌️');const price=calculatePrice();const museumData=JSON.parse(localStorage.getItem(MUSEUM_KEY))||[];museumData.push({basePrice:price,date:Date.now(),img:canvas.toDataURL(),likes:0});localStorage.setItem(MUSEUM_KEY,JSON.stringify(museumData));recordPainting();updateQuestProgress('museum',1);clearCanvas();consumeCanvas();renderMuseum();updateStatsUI();showToast('Terpajang!','Lukisan dipajang di Museum','gold','🏛️',3000);}
+
+function museumPrice(item){return item.basePrice+Math.floor((Date.now()-item.date)/60000)*500;}
+function downloadImage(dataUrl,index){const l=document.createElement('a');l.href=dataUrl;l.download='karya_'+(index+1)+'.png';document.body.appendChild(l);l.click();document.body.removeChild(l);}
+
+function renderMuseum(){
+    const list=document.getElementById("museumList");const m=JSON.parse(localStorage.getItem(MUSEUM_KEY))||[];
+    if(m.length===0){list.innerHTML="<p style='grid-column:1/-1;opacity:.5;font-size:12px;text-align:center'>Museum kosong...</p>";return;}
+    const bannerURL=getActiveBannerURL();list.innerHTML="";
+    m.forEach((item,index)=>{
+        const currentPrice=museumPrice(item);const card=document.createElement('div');card.className='museum-card';
+        let bgHTML='';if(bannerURL){bgHTML='<img class="museum-card-bg" src="'+bannerURL+'" alt="">';}
+        card.innerHTML=bgHTML+'<div class="museum-card-content"><img class="museum-painting" src="'+item.img+'" onclick="showFullImage(\''+item.img+'\')"><div class="museum-likes">♥︎ '+(item.likes||0).toLocaleString()+' Suka</div><p style="font-size:12px;color:var(--gold);font-weight:700;margin:5px 0;">Rp '+currentPrice.toLocaleString("id-ID")+'</p><div style="display:flex;gap:5px;"><button onclick="openMuseumSell('+index+')" class="btn-small" style="background:var(--success);flex:1;padding:5px;">Jual</button><button onclick="downloadImage(\''+item.img+'\','+index+')" class="btn-small" style="background:var(--info);flex:1;padding:5px;">💾</button></div></div>';
+        list.appendChild(card);
+    });updateStatsUI();
+}
+
+function openMuseumSell(index){const museumData=JSON.parse(localStorage.getItem(MUSEUM_KEY));const price=museumPrice(museumData[index]);lastPrice=price;activeMuseumIndex=index;priceText.innerText="Jual koleksi Rp "+price.toLocaleString("id-ID")+" ?";modalConfirmBtn.onclick=confirmMuseumSell;modal.style.display="flex";}
+function confirmMuseumSell(){playSFX('sfx-money');const museumData=JSON.parse(localStorage.getItem(MUSEUM_KEY));const userData=JSON.parse(localStorage.getItem(KEY));userData.saldo+=lastPrice;localStorage.setItem(KEY,JSON.stringify(userData));museumData.splice(activeMuseumIndex,1);localStorage.setItem(MUSEUM_KEY,JSON.stringify(museumData));updateBalanceDisplay(userData.saldo);recordSale(lastPrice);addIncomeLog(lastPrice);updateQuestProgress('sell',1);updateQuestProgress('earn',lastPrice);drawIncomeChart();renderMuseum();closeModal();showToast('Koleksi Terjual!','+Rp '+lastPrice.toLocaleString('id-ID'),'success','💰');}
+
+function hapusAkun(){if(confirm("Hapus semua data?")){stopBannerSlideshow();if(collectorCheckInterval)clearInterval(collectorCheckInterval);localStorage.clear();location.reload();}}
+
+canvas.addEventListener("mousedown",startPaint);
+window.addEventListener("mouseup",(e)=>endPaint(e));
+canvas.addEventListener("mousemove",draw);
+canvas.addEventListener("touchstart",(e)=>{startPaint(e);e.preventDefault();},{passive:false});
+canvas.addEventListener("touchend",(e)=>{endPaint(e);e.preventDefault();},{passive:false});
+canvas.addEventListener("touchmove",(e)=>{draw(e);e.preventDefault();},{passive:false});
+</script>
+</body>
+</html>
