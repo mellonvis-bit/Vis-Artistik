@@ -1306,6 +1306,34 @@
                             <button class="btn-small bingkai-buy-btn" onclick="buyBingkai('bunga')">Beli</button>
                         </div>
                     </div>
+                    <div class="bingkai-card">
+                        <div class="bingkai-preview-wrap">
+                            <img class="bingkai-preview-img" src="Bingkai artistik.png" alt="Bingkai Artistik" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                            <div class="bingkai-fallback">🎨</div>
+                        </div>
+                        <div class="bingkai-info">
+                            <div class="bingkai-name">🎨 Bingkai Artistik</div>
+                            <div class="bingkai-desc">Bingkai penuh ekspresi seni untuk jiwa kreatif sejati</div>
+                            <div class="bingkai-price">Rp 700.000</div>
+                        </div>
+                        <div class="bingkai-actions" id="bingkai-actions-artistik">
+                            <button class="btn-small bingkai-buy-btn" onclick="buyBingkai('artistik')">Beli</button>
+                        </div>
+                    </div>
+                    <div class="bingkai-card">
+                        <div class="bingkai-preview-wrap">
+                            <img class="bingkai-preview-img" src="Bingkai kayu.png" alt="Bingkai Kayu" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                            <div class="bingkai-fallback">🪵</div>
+                        </div>
+                        <div class="bingkai-info">
+                            <div class="bingkai-name">🪵 Bingkai Kayu</div>
+                            <div class="bingkai-desc">Bingkai alami bermotif kayu hangat nan elegan</div>
+                            <div class="bingkai-price">Rp 700.000</div>
+                        </div>
+                        <div class="bingkai-actions" id="bingkai-actions-kayu">
+                            <button class="btn-small bingkai-buy-btn" onclick="buyBingkai('kayu')">Beli</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2033,7 +2061,9 @@ function removeProfilePic() { localStorage.removeItem(PROFILE_KEY); updateProfil
 const BINGKAI_KEY = "lukisanku_bingkai";
 const BINGKAI_CATALOG = {
     emas: { name: 'Bingkai Emas', price: 1500000, src: 'Bingkai emas.png', icon: '👑' },
-    bunga: { name: 'Bingkai Bunga', price: 700000, src: 'Bingkai bunga.png', icon: '🌸' }
+    bunga: { name: 'Bingkai Bunga', price: 700000, src: 'Bingkai bunga.png', icon: '🌸' },
+    artistik: { name: 'Bingkai Artistik', price: 700000, src: 'Bingkai artistik.png', icon: '🎨' },
+    kayu: { name: 'Bingkai Kayu', price: 700000, src: 'Bingkai kayu.png', icon: '🪵' }
 };
 function getBingkaiData() { try { return JSON.parse(localStorage.getItem(BINGKAI_KEY)) || { owned: [], active: null }; } catch(e) { return { owned: [], active: null }; } }
 function saveBingkaiData(data) { localStorage.setItem(BINGKAI_KEY, JSON.stringify(data)); }
