@@ -931,6 +931,87 @@
             text-align: center; font-size: 10px; color: rgba(148,163,184,0.5);
             margin-top: 10px; font-style: italic;
         }
+
+        /* ===== TOKO BINGKAI ===== */
+        .bingkai-shop-grid {
+            display: flex; flex-direction: column; gap: 14px; padding: 4px 2px;
+        }
+        .bingkai-card {
+            background: rgba(15,23,42,0.4); border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.08);
+            overflow: hidden; display: flex; flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .bingkai-card:active { transform: scale(0.98); }
+        .bingkai-card.owned {
+            border-color: rgba(16,185,129,0.4);
+            background: rgba(16,185,129,0.05);
+        }
+        .bingkai-preview-wrap {
+            width: 100%; height: 140px;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, rgba(30,41,59,0.8), rgba(15,23,42,0.9));
+            position: relative; overflow: hidden;
+        }
+        .bingkai-preview-img {
+            width: 100%; height: 100%; object-fit: contain;
+            padding: 10px; box-sizing: border-box;
+        }
+        .bingkai-fallback {
+            font-size: 64px; display: none;
+            align-items: center; justify-content: center;
+            width: 100%; height: 100%;
+        }
+        .bingkai-info {
+            padding: 12px 14px 8px;
+        }
+        .bingkai-name {
+            font-size: 14px; font-weight: 800;
+            color: var(--text); margin-bottom: 4px;
+        }
+        .bingkai-desc {
+            font-size: 11px; color: #94a3b8; line-height: 1.4; margin-bottom: 6px;
+        }
+        .bingkai-price {
+            font-size: 13px; font-weight: 800; color: var(--gold);
+        }
+        .bingkai-actions {
+            padding: 8px 14px 14px;
+            display: flex; gap: 8px;
+        }
+        .bingkai-buy-btn {
+            flex: 1; padding: 9px; font-size: 12px;
+            background: linear-gradient(135deg, var(--accent), #3b82f6);
+        }
+        .bingkai-equip-btn {
+            flex: 1; padding: 9px; font-size: 12px;
+        }
+        .bingkai-status-badge {
+            display: inline-block; font-size: 10px; font-weight: 800;
+            padding: 3px 10px; border-radius: 20px;
+            background: rgba(16,185,129,0.15); color: var(--success);
+            border: 1px solid rgba(16,185,129,0.3);
+            margin-bottom: 6px;
+        }
+
+        /* ===== PROFILE FRAME OVERLAY ===== */
+        .profile-pic-wrapper {
+            position: relative; flex-shrink: 0; cursor: pointer;
+        }
+        #profileFrameOverlay {
+            position: absolute; inset: -6px;
+            pointer-events: none; z-index: 2;
+            width: calc(100% + 12px); height: calc(100% + 12px);
+        }
+        #profileFrameOverlayLarge {
+            position: absolute; inset: -8px;
+            pointer-events: none; z-index: 2;
+            width: calc(100% + 16px); height: calc(100% + 16px);
+            border-radius: 50%;
+        }
+        .profile-pic-frame-wrap {
+            position: relative; display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -1035,7 +1116,10 @@
 
         <!-- Foto Profil -->
         <p style="font-size:14px;font-weight:800;color:var(--accent);margin:0 0 2px;">📷 Profil Toko</p>
-        <img id="profilePreviewLarge" class="profile-preview-large" src="" alt="Profile">
+        <div style="position:relative;display:inline-block;margin:8px auto 6px;">
+            <img id="profilePreviewLarge" class="profile-preview-large" src="" alt="Profile" style="position:relative;z-index:1;">
+            <img id="profileFrameOverlayLarge" src="" alt="" style="display:none;position:absolute;inset:-8px;width:calc(100% + 16px);height:calc(100% + 16px);pointer-events:none;z-index:2;object-fit:contain;">
+        </div>
         <input type="file" id="profileInput" accept="image/*" onchange="handleProfileUpload(event)" style="display:none;">
         <button class="sell-btn" style="background:var(--accent);width:100%;" onclick="document.getElementById('profileInput').click()">📁 Pilih Foto Profil</button>
         <button class="sell-btn" style="background:var(--danger);width:100%;" onclick="removeProfilePic()">🗑 Hapus Foto</button>
@@ -1120,6 +1204,7 @@
                 <div class="header-top">
                     <div class="profile-pic-wrapper" onclick="openProfileModal()">
                         <img id="profilePic" class="profile-pic" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23334155'/%3E%3Ccircle cx='50' cy='38' r='18' fill='%2394a3b8'/%3E%3Cellipse cx='50' cy='75' rx='28' ry='20' fill='%2394a3b8'/%3E%3C/svg%3E" alt="Profile">
+                        <img id="profileFrameOverlay" src="" alt="" style="display:none; position:absolute; inset:-6px; width:calc(100% + 12px); height:calc(100% + 12px); pointer-events:none; z-index:2; object-fit:contain;">
                         <div class="profile-pic-edit" id="profileEditBadge">📷</div>
                     </div>
                     <div class="shop-text-content">
@@ -1167,6 +1252,7 @@
                 <button class="shop-tab active" onclick="switchShopTab('canvas', this)"><span class="shop-tab-icon">🖼️</span>Kanvas</button>
                 <button class="shop-tab" onclick="switchShopTab('banner', this)"><span class="shop-tab-icon">🏞️</span>Banner</button>
                 <button class="shop-tab" onclick="switchShopTab('supply', this)"><span class="shop-tab-icon">🎨</span>Supplies</button>
+                <button class="shop-tab" onclick="switchShopTab('bingkai', this)"><span class="shop-tab-icon">✨</span>Bingkai</button>
             </div>
             <div class="shop-tab-content active" id="tab-canvas">
                 <div class="shop-grid">
@@ -1188,6 +1274,38 @@
                     <div class="shop-item"><span class="item-icon">⭐</span><b>Premium Brush</b><span class="stock" id="stock-premium">Belum</span><span>Rp 300rb</span><button class="btn-small" style="width:100%; padding:5px;" onclick="buySupply('premium')">Beli</button></div>
                     <div class="shop-item"><span class="item-icon">🌈</span><b>Gradient Kit</b><span class="stock" id="stock-gradient">Belum</span><span>Rp 250rb</span><button class="btn-small" style="width:100%; padding:5px;" onclick="buySupply('gradient')">Beli</button></div>
                     <div class="shop-item"><span class="item-icon">✨</span><b>Gold Palette</b><span class="stock" id="stock-goldpalette">Belum</span><span>Rp 400rb</span><button class="btn-small" style="width:100%; padding:5px;" onclick="buySupply('goldpalette')">Beli</button></div>
+                </div>
+            </div>
+            <div class="shop-tab-content" id="tab-bingkai">
+                <div class="bingkai-shop-grid">
+                    <div class="bingkai-card">
+                        <div class="bingkai-preview-wrap">
+                            <img class="bingkai-preview-img" src="Bingkai/Bingkai emas.png" alt="Bingkai Emas" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                            <div class="bingkai-fallback">👑</div>
+                        </div>
+                        <div class="bingkai-info">
+                            <div class="bingkai-name">👑 Bingkai Emas</div>
+                            <div class="bingkai-desc">Bingkai mewah berkilau emas untuk foto profil eksklusif</div>
+                            <div class="bingkai-price">Rp 1.500.000</div>
+                        </div>
+                        <div class="bingkai-actions" id="bingkai-actions-emas">
+                            <button class="btn-small bingkai-buy-btn" onclick="buyBingkai('emas')">Beli</button>
+                        </div>
+                    </div>
+                    <div class="bingkai-card">
+                        <div class="bingkai-preview-wrap">
+                            <img class="bingkai-preview-img" src="Bingkai/Bingkai bunga.png" alt="Bingkai Bunga" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                            <div class="bingkai-fallback">🌸</div>
+                        </div>
+                        <div class="bingkai-info">
+                            <div class="bingkai-name">🌸 Bingkai Bunga</div>
+                            <div class="bingkai-desc">Bingkai cantik bermotif bunga segar nan indah</div>
+                            <div class="bingkai-price">Rp 700.000</div>
+                        </div>
+                        <div class="bingkai-actions" id="bingkai-actions-bunga">
+                            <button class="btn-small bingkai-buy-btn" onclick="buyBingkai('bunga')">Beli</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1782,6 +1900,14 @@ function openProfileModal() {
     preview.src=localStorage.getItem(PROFILE_KEY)||DEFAULT_PROFILE;
     const d=JSON.parse(localStorage.getItem(KEY));if(d)document.getElementById('renameInput').value=d.shop||'';
     _syncBannerPreview();
+    // Sync bingkai frame in modal
+    const bData=getBingkaiData();
+    const frameLargeEl=document.getElementById('profileFrameOverlayLarge');
+    if(frameLargeEl){
+        if(bData.active&&BINGKAI_CATALOG[bData.active]){
+            frameLargeEl.src=BINGKAI_CATALOG[bData.active].src;frameLargeEl.style.display='block';
+        } else { frameLargeEl.src='';frameLargeEl.style.display='none'; }
+    }
     modal.style.display='flex';
 }
 function closeProfileModal(){document.getElementById('profileModal').style.display='none';}
@@ -1902,6 +2028,86 @@ function handleProfileUpload(event) {
     }; reader.readAsDataURL(file); event.target.value='';
 }
 function removeProfilePic() { localStorage.removeItem(PROFILE_KEY); updateProfilePicUI(); document.getElementById('profilePreviewLarge').src=DEFAULT_PROFILE; showToast('Foto Dihapus','Foto profil kembali ke default','info','🗑'); }
+
+// ===== BINGKAI SYSTEM =====
+const BINGKAI_KEY = "lukisanku_bingkai";
+const BINGKAI_CATALOG = {
+    emas: { name: 'Bingkai Emas', price: 1500000, src: 'Bingkai/Bingkai emas.png', icon: '👑' },
+    bunga: { name: 'Bingkai Bunga', price: 700000, src: 'Bingkai/Bingkai bunga.png', icon: '🌸' }
+};
+function getBingkaiData() { try { return JSON.parse(localStorage.getItem(BINGKAI_KEY)) || { owned: [], active: null }; } catch(e) { return { owned: [], active: null }; } }
+function saveBingkaiData(data) { localStorage.setItem(BINGKAI_KEY, JSON.stringify(data)); }
+
+function buyBingkai(id) {
+    const catalog = BINGKAI_CATALOG[id]; if(!catalog) return;
+    const d = JSON.parse(localStorage.getItem(KEY)); if(!d) return;
+    const bData = getBingkaiData();
+    if(bData.owned.includes(id)) { showToast('Sudah Dimiliki','Kamu sudah punya bingkai ini!','info','ℹ️'); return; }
+    if(d.saldo < catalog.price) { showToast('Saldo Kurang!','Perlu Rp '+catalog.price.toLocaleString('id-ID'),'error','❌'); return; }
+    d.saldo -= catalog.price;
+    localStorage.setItem(KEY, JSON.stringify(d));
+    bData.owned.push(id);
+    saveBingkaiData(bData);
+    playSFX('sfx-money');
+    updateBalanceDisplay(d.saldo);
+    updateBingkaiUI();
+    showToast(catalog.icon+' Bingkai Dibeli!', catalog.name+' berhasil dibeli!','gold',catalog.icon,4000);
+}
+
+function equipBingkai(id) {
+    const bData = getBingkaiData();
+    if(!bData.owned.includes(id)) return;
+    if(bData.active === id) {
+        bData.active = null; saveBingkaiData(bData);
+        applyBingkaiToProfile(null); updateBingkaiUI();
+        showToast('Bingkai Dilepas','Foto profil kembali tanpa bingkai','info','🖼️');
+    } else {
+        bData.active = id; saveBingkaiData(bData);
+        applyBingkaiToProfile(id); updateBingkaiUI();
+        const catalog = BINGKAI_CATALOG[id];
+        showToast(catalog.icon+' Bingkai Dipasang!',catalog.name+' terpasang di foto profil','success',catalog.icon,3000);
+    }
+}
+
+function applyBingkaiToProfile(id) {
+    const frameEl = document.getElementById('profileFrameOverlay');
+    const frameLargeEl = document.getElementById('profileFrameOverlayLarge');
+    if(!id) {
+        if(frameEl){frameEl.src='';frameEl.style.display='none';}
+        if(frameLargeEl){frameLargeEl.src='';frameLargeEl.style.display='none';}
+        return;
+    }
+    const catalog = BINGKAI_CATALOG[id]; if(!catalog) return;
+    if(frameEl){frameEl.src=catalog.src;frameEl.style.display='block';}
+    if(frameLargeEl){frameLargeEl.src=catalog.src;frameLargeEl.style.display='block';}
+}
+
+function updateBingkaiUI() {
+    const bData = getBingkaiData();
+    Object.keys(BINGKAI_CATALOG).forEach(id => {
+        const actionsEl = document.getElementById('bingkai-actions-'+id);
+        if(!actionsEl) return;
+        const card = actionsEl.closest('.bingkai-card');
+        const catalog = BINGKAI_CATALOG[id];
+        const isOwned = bData.owned.includes(id);
+        const isActive = bData.active === id;
+        if(isOwned) {
+            if(card) card.classList.add('owned');
+            actionsEl.innerHTML = (isActive?'<div style="padding:0 0 6px"><span class="bingkai-status-badge">✓ Terpasang</span></div>':'') +
+                '<button class="btn-small bingkai-equip-btn" style="background:'+(isActive?'var(--danger)':'var(--success)')+';flex:1;padding:9px;font-size:12px;width:100%;" onclick="equipBingkai(\''+id+'\')">'+(isActive?'✕ Lepas Bingkai':'✓ Pasang Bingkai')+'</button>';
+        } else {
+            if(card) card.classList.remove('owned');
+            actionsEl.innerHTML = '<button class="btn-small bingkai-buy-btn" style="width:100%;" onclick="buyBingkai(\''+id+'\')">Beli</button>';
+        }
+    });
+}
+
+function loadBingkaiOnStart() {
+    const bData = getBingkaiData();
+    if(bData.active) applyBingkaiToProfile(bData.active);
+    updateBingkaiUI();
+}
+
 function updateProfilePicUI() {
     const saved=localStorage.getItem(PROFILE_KEY); document.getElementById('profilePic').src=saved||DEFAULT_PROFILE;
     const eb=document.getElementById('profileEditBadge'); if(saved) eb.classList.add('hidden'); else eb.classList.remove('hidden');
@@ -2353,6 +2559,7 @@ function loadGame(){
     renderLeaderboard();
     // Refresh leaderboard label every minute
     setInterval(renderLeaderboard, 60000);
+    loadBingkaiOnStart();
 }
 
 function updateBalanceDisplay(val){const el=document.getElementById("saldo");el.innerText=val.toLocaleString("id-ID");el.parentElement.classList.remove('pop');void el.parentElement.offsetWidth;el.parentElement.classList.add('pop');updateBadge(val);renderLeaderboard();}
@@ -2565,4 +2772,4 @@ canvas.addEventListener("touchend",(e)=>{endPaint(e);e.preventDefault();},{passi
 canvas.addEventListener("touchmove",(e)=>{draw(e);e.preventDefault();},{passive:false});
 </script>
 </body>
-</html>
+    </html>
