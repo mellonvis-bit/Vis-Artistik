@@ -1280,7 +1280,7 @@
                 <div class="bingkai-shop-grid">
                     <div class="bingkai-card">
                         <div class="bingkai-preview-wrap">
-                            <img class="bingkai-preview-img" src="Bingkai/Bingkai emas.png" alt="Bingkai Emas" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                            <img class="bingkai-preview-img" src="Bingkai emas.png" alt="Bingkai Emas" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
                             <div class="bingkai-fallback">👑</div>
                         </div>
                         <div class="bingkai-info">
@@ -1294,7 +1294,7 @@
                     </div>
                     <div class="bingkai-card">
                         <div class="bingkai-preview-wrap">
-                            <img class="bingkai-preview-img" src="Bingkai/Bingkai bunga.png" alt="Bingkai Bunga" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                            <img class="bingkai-preview-img" src="Bingkai bunga.png" alt="Bingkai Bunga" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
                             <div class="bingkai-fallback">🌸</div>
                         </div>
                         <div class="bingkai-info">
@@ -2032,8 +2032,8 @@ function removeProfilePic() { localStorage.removeItem(PROFILE_KEY); updateProfil
 // ===== BINGKAI SYSTEM =====
 const BINGKAI_KEY = "lukisanku_bingkai";
 const BINGKAI_CATALOG = {
-    emas: { name: 'Bingkai Emas', price: 1500000, src: 'Bingkai/Bingkai emas.png', icon: '👑' },
-    bunga: { name: 'Bingkai Bunga', price: 700000, src: 'Bingkai/Bingkai bunga.png', icon: '🌸' }
+    emas: { name: 'Bingkai Emas', price: 1500000, src: 'Bingkai emas.png', icon: '👑' },
+    bunga: { name: 'Bingkai Bunga', price: 700000, src: 'Bingkai bunga.png', icon: '🌸' }
 };
 function getBingkaiData() { try { return JSON.parse(localStorage.getItem(BINGKAI_KEY)) || { owned: [], active: null }; } catch(e) { return { owned: [], active: null }; } }
 function saveBingkaiData(data) { localStorage.setItem(BINGKAI_KEY, JSON.stringify(data)); }
@@ -2772,4 +2772,4 @@ canvas.addEventListener("touchend",(e)=>{endPaint(e);e.preventDefault();},{passi
 canvas.addEventListener("touchmove",(e)=>{draw(e);e.preventDefault();},{passive:false});
 </script>
 </body>
-    </html>
+</html>
