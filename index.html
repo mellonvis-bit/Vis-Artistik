@@ -1023,6 +1023,7 @@
 <audio id="sfx-boo" src="https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3" preload="auto"></audio>
 <audio id="sfx-message" src="https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3" preload="auto"></audio>
 <audio id="backsound" src="piano jazz.mp3" loop preload="auto"></audio>
+<audio id="rainSound" src="mode hujan.mp3" loop preload="auto"></audio>
 
 <div id="toastContainer"></div>
 <div id="tutorialOverlay"></div>
@@ -1086,6 +1087,12 @@
             <input type="range" id="volumeSlider" min="0" max="100" value="50"
                 oninput="setMusicVolume(this.value)"
                 style="width:100%; accent-color:var(--accent); cursor:pointer;">
+        </div>
+        <div class="setting-row" style="flex-direction:column; align-items:flex-start; gap:6px;">
+            <span>🌧️ Volume Hujan</span>
+            <input type="range" id="rainVolumeSlider" min="0" max="100" value="35"
+                oninput="setRainVolume(this.value)"
+                style="width:100%; accent-color:#38bdf8; cursor:pointer;">
         </div>
         <div class="setting-row">
             <span>📺 Resolusi</span>
@@ -2242,7 +2249,7 @@ function buyBanner(id){const d=JSON.parse(localStorage.getItem(KEY));if(!d.banne
 function applyBanner(id){const img1=document.getElementById('bannerImage'),img2=document.getElementById('bannerImage2'),header=document.querySelector('.header');img2.classList.remove('active');img2.src='';bannerCurrentLayer=1;const url=id==='custom'?localStorage.getItem(CUSTOM_BANNER_KEY):(id&&BANNERS[id]?BANNERS[id]:null);if(url){img1.src=url;img1.classList.add('active');header.classList.add('has-banner');}else{img1.src='';img1.classList.remove('active');header.classList.remove('has-banner');}}
 function restartBannerSlideshow(){stopBannerSlideshow();const owned=getOwnedBannerIds();if(owned.length>1&&gameSettings.bannerAnim)startBannerSlideshow();}
 
-let gameSettings={isMuted:false,resolution:"High",bannerAnim:true,musicMuted:false,musicVolume:50};
+let gameSettings={isMuted:false,resolution:"High",bannerAnim:true,musicMuted:false,musicVolume:50,rainVolume:35};
 // gameSettings akan di-reload dari IDB cache setelah preload di window.onload
 
 // --- BACKSOUND MUSIC ---
@@ -2273,14 +2280,20 @@ function setMusicVolume(val){
     if(bs) bs.volume=gameSettings.musicVolume/100;
     saveSettingsData();
 }
+function setRainVolume(val){
+    gameSettings.rainVolume=parseInt(val);
+    const rs=document.getElementById('rainSound');
+    if(rs) rs.volume=gameSettings.rainVolume/100;
+    saveSettingsData();
+}
 // Trigger backsound on first user click
 document.addEventListener('click',function _firstClick(){
     startBacksound();
     document.removeEventListener('click',_firstClick);
 },{once:true,capture:true});
 function toggleSettings(){const modal=document.getElementById('settingsModal');modal.style.display=modal.style.display==='flex'?'none':'flex';updateSettingsUI();}
-function updateSettingsUI(){document.getElementById('muteBtn').innerText=gameSettings.isMuted?"Mute":"Aktif";document.getElementById('muteBtn').style.background=gameSettings.isMuted?"var(--danger)":"var(--success)";document.getElementById('resBtn').innerText=gameSettings.resolution;document.getElementById('resBtn').style.background=gameSettings.resolution==="High"?"var(--accent)":"var(--info)";document.getElementById('bannerAnimBtn').innerText=gameSettings.bannerAnim?"Aktif":"Mati";document.getElementById('bannerAnimBtn').style.background=gameSettings.bannerAnim?"var(--success)":"var(--danger)";const mb=document.getElementById('musicBtn');if(mb){mb.innerText=gameSettings.musicMuted?"Mati":"Aktif";mb.style.background=gameSettings.musicMuted?"var(--danger)":"var(--success)";}const vs=document.getElementById('volumeSlider');if(vs)vs.value=gameSettings.musicVolume!==undefined?gameSettings.musicVolume:50;}
-function toggleMute(){gameSettings.isMuted=!gameSettings.isMuted;saveSettingsData();updateSettingsUI();}
+function updateSettingsUI(){document.getElementById('muteBtn').innerText=gameSettings.isMuted?"Mute":"Aktif";document.getElementById('muteBtn').style.background=gameSettings.isMuted?"var(--danger)":"var(--success)";document.getElementById('resBtn').innerText=gameSettings.resolution;document.getElementById('resBtn').style.background=gameSettings.resolution==="High"?"var(--accent)":"var(--info)";document.getElementById('bannerAnimBtn').innerText=gameSettings.bannerAnim?"Aktif":"Mati";document.getElementById('bannerAnimBtn').style.background=gameSettings.bannerAnim?"var(--success)":"var(--danger)";const mb=document.getElementById('musicBtn');if(mb){mb.innerText=gameSettings.musicMuted?"Mati":"Aktif";mb.style.background=gameSettings.musicMuted?"var(--danger)":"var(--success)";}const vs=document.getElementById('volumeSlider');if(vs)vs.value=gameSettings.musicVolume!==undefined?gameSettings.musicVolume:50;const rvs=document.getElementById('rainVolumeSlider');if(rvs)rvs.value=gameSettings.rainVolume!==undefined?gameSettings.rainVolume:35;}
+function toggleMute(){gameSettings.isMuted=!gameSettings.isMuted;const rs=document.getElementById('rainSound');if(rs){if(gameSettings.isMuted){rs.pause();}else if(isRaining){rs.volume=(gameSettings.rainVolume!==undefined?gameSettings.rainVolume:35)/100;rs.play().catch(()=>{});}}saveSettingsData();updateSettingsUI();}
 function toggleResolution(){gameSettings.resolution=gameSettings.resolution==="High"?"Low":"High";saveSettingsData();updateSettingsUI();if(currentActiveCanvas)setupCanvasSize(currentActiveCanvas);}
 function toggleBannerAnim(){gameSettings.bannerAnim=!gameSettings.bannerAnim;saveSettingsData();updateSettingsUI();if(gameSettings.bannerAnim){restartBannerSlideshow();showToast('Animasi Aktif','Banner berganti otomatis','success','🏞️');}else{stopBannerSlideshow();showToast('Animasi Mati','Banner tidak berganti','info','⏸️');}}
 function saveSettingsData(){localStorage.setItem(SETTINGS_KEY,JSON.stringify(gameSettings));}
@@ -2404,6 +2417,13 @@ function startRainSession(){
     initRain();
     drawRain();
     startLightning();
+    // Play rain sound
+    const rs=document.getElementById('rainSound');
+    if(rs&&!gameSettings.isMuted){
+        rs.volume=(gameSettings.rainVolume!==undefined?gameSettings.rainVolume:35)/100;
+        rs.currentTime=0;
+        rs.play().catch(()=>{});
+    }
     // Rain lasts 90-180 seconds
     const duration=90000+Math.random()*90000;
     setTimeout(()=>{stopRainSession();},duration);
@@ -2417,6 +2437,16 @@ function stopRainSession(){
     if(lightningInterval){clearInterval(lightningInterval);lightningInterval=null;}
     if(rainAnimFrame){cancelAnimationFrame(rainAnimFrame);rainAnimFrame=null;}
     drops=[];splashes=[];
+    // Stop rain sound with fade out
+    const rs=document.getElementById('rainSound');
+    if(rs&&!rs.paused){
+        let vol=rs.volume;
+        const fadeOut=setInterval(()=>{
+            vol=Math.max(0,vol-0.05);
+            rs.volume=vol;
+            if(vol<=0){clearInterval(fadeOut);rs.pause();rs.currentTime=0;rs.volume=(gameSettings.rainVolume!==undefined?gameSettings.rainVolume:35)/100;}
+        },80);
+    }
 }
 
 setInterval(()=>{if(!isRaining&&Math.random()>0.7)startRainSession();},60000);
@@ -2510,9 +2540,13 @@ window.onload=async ()=>{
     if(gameSettings.bannerAnim===undefined) gameSettings.bannerAnim=true;
     if(gameSettings.musicVolume===undefined) gameSettings.musicVolume=50;
     if(gameSettings.musicMuted===undefined) gameSettings.musicMuted=false;
+    if(gameSettings.rainVolume===undefined) gameSettings.rainVolume=35;
     // Apply saved music volume
     const bs=document.getElementById('backsound');
     if(bs) bs.volume=gameSettings.musicVolume/100;
+    // Apply saved rain volume
+    const rsInit=document.getElementById('rainSound');
+    if(rsInit) rsInit.volume=gameSettings.rainVolume/100;
     initExtendedPalette();initRain();updateSettingsUI();
     window.addEventListener('resize',()=>{rainCanvas2.width=window.innerWidth;rainCanvas2.height=window.innerHeight;});
     setTimeout(()=>{
