@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🌙 Hadiah Ramadhan 2026 – Vis Artistik</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-dark: #0d3b1e;
+    --green-mid: #1a6b38;
+    --green-light: #2ec45a;
+    --gold: #f5c842;
+    --gold2: #ffe082;
+    --cream: #fff8e7;
+    --red-accent: #e53935;
+    --shadow: 0 8px 32px rgba(0,0,0,0.45);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    width: 100%; min-height: 100vh;
+    overflow-x: hidden;
+    font-family: 'Poppins', sans-serif;
+    background: var(--green-dark);
+    color: var(--cream);
+  }
+
+  /* ===== BG STARS ===== */
+  .stars-bg {
+    position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+  }
+  .star {
+    position: absolute; border-radius: 50%;
+    background: var(--gold); opacity: 0;
+    animation: twinkle var(--d, 3s) ease-in-out infinite;
+    animation-delay: var(--dl, 0s);
+  }
+  @keyframes twinkle {
+    0%,100%{opacity:0;transform:scale(0.7);}
+    50%{opacity:0.85;transform:scale(1.2);}
+  }
+
+  /* ===== LANTERNS ===== */
+  .lanterns {
+    position: fixed; top: 0; left: 0; width: 100%; z-index: 1; pointer-events: none;
+    display: flex; justify-content: space-around;
+  }
+  .lantern-wrap { display: flex; flex-direction: column; align-items: center; }
+  .lantern-string { width: 2px; background: var(--gold); opacity: 0.6; }
+  .lantern {
+    width: 32px; height: 44px; border-radius: 50% 50% 40% 40%;
+    position: relative;
+    animation: swingL 3s ease-in-out infinite;
+  }
+  .lantern:nth-child(2) { animation-direction: alternate-reverse; }
+  @keyframes swingL {
+    0%,100%{transform:rotate(-8deg);} 50%{transform:rotate(8deg);}
+  }
+  .lantern-inner {
+    position: absolute; inset: 4px; border-radius: inherit;
+    opacity: 0.6;
+  }
+  .lantern-glow {
+    position: absolute; inset: -6px; border-radius: 50%;
+    filter: blur(8px); opacity: 0.5;
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+  @keyframes glow { from{opacity:0.3;} to{opacity:0.7;} }
+  .lantern-tassel { width: 1px; height: 12px; background: var(--gold); margin: 0 auto; opacity: 0.7; }
+
+  /* ===== SCROLLING STARS ===== */
+  .top-banner {
+    position: relative; z-index: 2;
+    background: linear-gradient(135deg, #0a2e14 0%, var(--green-mid) 50%, #0a2e14 100%);
+    border-bottom: 3px solid var(--gold);
+    padding: 10px 16px 8px;
+    text-align: center;
+    overflow: hidden;
+  }
+  .top-banner::before {
+    content: '☪️ ✨ 🌙 ✨ ☪️ ✨ 🌙 ✨ ☪️ ✨ 🌙 ✨ ☪️ ✨ 🌙 ✨';
+    display: block; font-size: 14px; letter-spacing: 4px;
+    animation: scrollText 12s linear infinite;
+    white-space: nowrap; color: var(--gold);
+  }
+  @keyframes scrollText {
+    from{transform:translateX(100%);} to{transform:translateX(-100%);}
+  }
+  .top-title {
+    font-family: 'Amiri', serif;
+    font-size: 22px; font-weight: 700;
+    color: var(--gold);
+    text-shadow: 0 0 12px rgba(245,200,66,0.6);
+    margin-top: 6px; letter-spacing: 1px;
+  }
+  .top-sub { font-size: 11px; color: var(--gold2); opacity: 0.85; margin-top: 2px; }
+
+  /* ===== MAIN CARD ===== */
+  .main-wrapper {
+    position: relative; z-index: 2;
+    max-width: 420px; margin: 0 auto;
+    padding: 16px 14px 60px;
+  }
+
+  .moon-deco {
+    text-align: center; font-size: 64px; line-height: 1;
+    margin: 12px 0 4px;
+    animation: moonFloat 4s ease-in-out infinite;
+    filter: drop-shadow(0 0 18px rgba(245,200,66,0.7));
+  }
+  @keyframes moonFloat {
+    0%,100%{transform:translateY(0) rotate(-5deg);} 50%{transform:translateY(-8px) rotate(5deg);}
+  }
+
+  .card {
+    background: linear-gradient(145deg, #0f3d1f 0%, #1a5c2e 60%, #0f3d1f 100%);
+    border: 2px solid var(--gold);
+    border-radius: 20px;
+    padding: 20px 18px;
+    box-shadow: var(--shadow), 0 0 30px rgba(46,196,90,0.15);
+    position: relative; overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .card::before {
+    content: '';
+    position: absolute; inset: 0; border-radius: inherit;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent 0, transparent 20px,
+      rgba(245,200,66,0.03) 20px, rgba(245,200,66,0.03) 21px
+    );
+    pointer-events: none;
+  }
+  .card-title {
+    font-family: 'Amiri', serif;
+    font-size: 20px; font-weight: 700; color: var(--gold);
+    text-align: center; margin-bottom: 6px;
+    text-shadow: 0 0 8px rgba(245,200,66,0.5);
+  }
+  .card-subtitle {
+    text-align: center; font-size: 12px; color: var(--gold2);
+    margin-bottom: 16px; opacity: 0.85;
+  }
+
+  /* Prize boxes */
+  .prize-grid {
+    display: flex; gap: 8px; margin-bottom: 18px; justify-content: center;
+  }
+  .prize-box {
+    flex: 1; background: rgba(0,0,0,0.25);
+    border: 1.5px solid rgba(245,200,66,0.4);
+    border-radius: 12px; padding: 10px 6px; text-align: center;
+    position: relative; overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .prize-box:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(245,200,66,0.25); }
+  .prize-box .pb-icon { font-size: 24px; display: block; margin-bottom: 4px; }
+  .prize-box .pb-label { font-size: 9px; color: var(--gold2); display: block; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .prize-box .pb-amount { font-size: 13px; font-weight: 800; color: var(--gold); display: block; }
+  .prize-box.featured { border-color: var(--gold); background: rgba(245,200,66,0.08); }
+  .prize-box.featured::after {
+    content: '⭐ UTAMA'; position: absolute; top: 4px; right: -8px;
+    background: var(--gold); color: var(--green-dark);
+    font-size: 7px; font-weight: 800; padding: 1px 12px;
+    transform: rotate(15deg); letter-spacing: 0.5px;
+  }
+
+  /* Code display */
+  .code-section { margin-bottom: 16px; }
+  .code-label {
+    font-size: 11px; color: var(--gold2); text-align: center;
+    margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;
+  }
+  .code-display {
+    display: flex; justify-content: center; gap: 6px;
+    background: rgba(0,0,0,0.35);
+    border: 2px solid var(--gold);
+    border-radius: 14px; padding: 14px 10px;
+    position: relative;
+  }
+  .code-digit {
+    width: 38px; height: 48px;
+    background: linear-gradient(180deg, #1e5c30 0%, #0d3b1e 100%);
+    border: 1.5px solid rgba(245,200,66,0.5);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; font-weight: 800; color: var(--gold);
+    font-family: 'Courier New', monospace;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07);
+    animation: digitPulse 2.5s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 0.15s);
+  }
+  @keyframes digitPulse {
+    0%,100%{box-shadow:0 4px 12px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.07);}
+    50%{box-shadow:0 4px 12px rgba(0,0,0,0.4),0 0 10px rgba(245,200,66,0.3),inset 0 1px 0 rgba(255,255,255,0.07);}
+  }
+  .code-refresh-wrap {
+    display: flex; justify-content: center; margin-top: 8px;
+  }
+  .code-refresh {
+    background: none; border: none; color: var(--gold); font-size: 18px;
+    cursor: pointer; padding: 4px 10px;
+    transition: transform 0.3s;
+    opacity: 0.8;
+  }
+  .code-refresh:hover { transform: rotate(180deg); opacity: 1; }
+
+  /* Input */
+  .input-section { margin-bottom: 16px; }
+  .input-label {
+    font-size: 11px; color: var(--gold2); display: block;
+    margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;
+    text-align: center;
+  }
+  .code-input-wrap {
+    display: flex; gap: 6px; justify-content: center;
+  }
+  .code-input-wrap input {
+    width: 42px; height: 52px;
+    background: rgba(0,0,0,0.4);
+    border: 2px solid rgba(245,200,66,0.4);
+    border-radius: 10px;
+    text-align: center; font-size: 24px; font-weight: 800;
+    color: var(--gold); font-family: 'Courier New', monospace;
+    outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    caret-color: var(--gold);
+    -webkit-appearance: none;
+  }
+  .code-input-wrap input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 12px rgba(245,200,66,0.35);
+  }
+  .code-input-wrap input.correct { border-color: var(--green-light); color: var(--green-light); }
+  .code-input-wrap input.wrong { border-color: #ef5350; color: #ef5350; animation: shake 0.3s ease; }
+  @keyframes shake {
+    0%,100%{transform:translateX(0);} 25%{transform:translateX(-4px);} 75%{transform:translateX(4px);}
+  }
+
+  /* Claim button */
+  .btn-claim {
+    width: 100%; padding: 16px;
+    background: linear-gradient(135deg, #2ec45a 0%, #1a8c3c 50%, #2ec45a 100%);
+    background-size: 200% 100%;
+    border: none; border-radius: 14px;
+    font-size: 18px; font-weight: 800; color: white;
+    letter-spacing: 1px; cursor: pointer;
+    box-shadow: 0 6px 20px rgba(46,196,90,0.5);
+    transition: transform 0.15s, box-shadow 0.15s;
+    animation: btnShine 3s linear infinite;
+    position: relative; overflow: hidden;
+  }
+  .btn-claim::before {
+    content: ''; position: absolute;
+    top: 0; left: -100%; width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+    animation: shineMove 2.5s linear infinite;
+  }
+  @keyframes shineMove { to{left:160%;} }
+  .btn-claim:active { transform: scale(0.97); box-shadow: 0 3px 12px rgba(46,196,90,0.4); }
+  .btn-claim:disabled {
+    background: #333; box-shadow: none; cursor: not-allowed;
+    animation: none; color: #666;
+  }
+  .btn-claim:disabled::before { display: none; }
+
+  /* Info box */
+  .info-box {
+    background: rgba(245,200,66,0.08);
+    border: 1px solid rgba(245,200,66,0.25);
+    border-radius: 12px; padding: 12px 14px;
+    font-size: 11px; color: var(--gold2); line-height: 1.7;
+    margin-top: 14px;
+  }
+  .info-box strong { color: var(--gold); }
+
+  /* LOCKED STATE */
+  .locked-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,0.88) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpath d='M10 30h60v40H10z' fill='%23c62828' opacity='.5'/%3E%3Cpath d='M25 30V20a15 15 0 0130 0v10' fill='none' stroke='%23c62828' stroke-width='6' opacity='.5'/%3E%3C/svg%3E") center 30% / 80px no-repeat;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 30px;
+  }
+  .locked-overlay h2 { font-size: 28px; font-weight: 800; color: #ef5350; margin-bottom: 8px; margin-top: 80px; }
+  .locked-overlay p { font-size: 14px; color: #aaa; max-width: 280px; line-height: 1.6; }
+
+  /* ===== RAMADAN WELCOME POPUP ===== */
+  .popup-bg {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.75);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.4s ease;
+  }
+  @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+  .popup-box {
+    background: linear-gradient(145deg, #0f3d1f, #1a5c2e);
+    border: 2px solid var(--gold);
+    border-radius: 24px;
+    padding: 28px 22px 24px;
+    max-width: 360px; width: 100%;
+    text-align: center; position: relative;
+    box-shadow: 0 0 40px rgba(245,200,66,0.3), var(--shadow);
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  @keyframes popIn { from{transform:scale(0.7);opacity:0;} to{transform:scale(1);opacity:1;} }
+  .popup-close {
+    position: absolute; top: 12px; right: 14px;
+    background: rgba(245,200,66,0.15); border: 1px solid var(--gold);
+    border-radius: 50%; width: 30px; height: 30px;
+    font-size: 16px; color: var(--gold); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .popup-close:hover { background: rgba(245,200,66,0.3); }
+  .popup-moon { font-size: 56px; display: block; margin-bottom: 10px; animation: moonFloat 3s ease-in-out infinite; }
+  .popup-title {
+    font-family: 'Amiri', serif;
+    font-size: 24px; font-weight: 700; color: var(--gold);
+    text-shadow: 0 0 10px rgba(245,200,66,0.5);
+    margin-bottom: 8px;
+  }
+  .popup-sub { font-size: 13px; color: var(--gold2); line-height: 1.6; margin-bottom: 16px; }
+  .popup-deco { font-size: 20px; letter-spacing: 6px; margin-bottom: 12px; }
+  .popup-btn {
+    background: linear-gradient(135deg, #2ec45a, #1a8c3c);
+    border: none; border-radius: 10px; padding: 12px 32px;
+    font-size: 15px; font-weight: 700; color: white;
+    cursor: pointer; transition: transform 0.15s;
+    box-shadow: 0 4px 14px rgba(46,196,90,0.45);
+  }
+  .popup-btn:active { transform: scale(0.97); }
+
+  /* ===== PRIZE POPUP ===== */
+  .prize-popup-bg {
+    position: fixed; inset: 0; z-index: 300;
+    background: rgba(0,0,0,0.8);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+  }
+  .prize-popup {
+    background: linear-gradient(145deg, #0f3d1f, #1b5e34);
+    border: 3px solid var(--gold);
+    border-radius: 24px; padding: 30px 24px;
+    max-width: 360px; width: 100%; text-align: center;
+    position: relative; overflow: hidden;
+    box-shadow: 0 0 60px rgba(245,200,66,0.5), var(--shadow);
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .prize-popup::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(245,200,66,0.15) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .confetti-row { font-size: 22px; letter-spacing: 4px; margin-bottom: 10px; animation: confettiAnim 1s ease-in-out infinite alternate; }
+  @keyframes confettiAnim { from{letter-spacing:4px;} to{letter-spacing:8px;} }
+  .prize-amount {
+    font-size: 38px; font-weight: 800; color: var(--gold);
+    text-shadow: 0 0 20px rgba(245,200,66,0.8);
+    margin: 12px 0; animation: amountPop 0.6s cubic-bezier(0.175,0.885,0.32,1.275) 0.2s both;
+  }
+  @keyframes amountPop { from{transform:scale(0);opacity:0;} to{transform:scale(1);opacity:1;} }
+  .prize-popup h2 { font-size: 22px; font-weight: 800; color: white; margin-bottom: 8px; }
+  .prize-popup p { font-size: 13px; color: var(--gold2); line-height: 1.6; margin-bottom: 20px; }
+  .prize-close-btn {
+    background: linear-gradient(135deg, #2ec45a, #1a8c3c);
+    border: none; border-radius: 10px; padding: 12px 28px;
+    font-size: 15px; font-weight: 700; color: white;
+    cursor: pointer; transition: transform 0.15s;
+    box-shadow: 0 4px 14px rgba(46,196,90,0.5);
+  }
+  .prize-close-btn:active { transform: scale(0.97); }
+
+  /* ===== ERROR MSG ===== */
+  .error-msg {
+    text-align: center; font-size: 12px; color: #ef5350;
+    margin-top: 8px; min-height: 18px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  /* ===== AUDIO CONTROLS ===== */
+  .audio-ctrl {
+    position: fixed; bottom: 16px; right: 16px; z-index: 50;
+    background: rgba(245,200,66,0.15);
+    border: 1.5px solid var(--gold);
+    border-radius: 50%; width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    transition: background 0.2s;
+  }
+  .audio-ctrl:hover { background: rgba(245,200,66,0.3); }
+
+  /* ===== ORNAMENTS ===== */
+  .ornament-line {
+    display: flex; align-items: center; gap: 8px;
+    margin: 10px 0;
+  }
+  .ornament-line::before, .ornament-line::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .ornament-line span { font-size: 16px; color: var(--gold); white-space: nowrap; }
+
+  /* Geometric corner deco */
+  .card-corner {
+    position: absolute; width: 30px; height: 30px;
+    border-color: var(--gold); border-style: solid; opacity: 0.5;
+  }
+  .card-corner.tl { top: 8px; left: 8px; border-width: 2px 0 0 2px; }
+  .card-corner.tr { top: 8px; right: 8px; border-width: 2px 2px 0 0; }
+  .card-corner.bl { bottom: 8px; left: 8px; border-width: 0 0 2px 2px; }
+  .card-corner.br { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
+
+  .footer-text {
+    text-align: center; font-size: 10px; color: rgba(245,200,66,0.4);
+    margin-top: 16px; letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Stars BG -->
+<div class="stars-bg" id="starsBg"></div>
+
+<!-- Lanterns -->
+<div class="lanterns" id="lanterns"></div>
+
+<!-- TOP BANNER -->
+<div class="top-banner">
+  <div class="top-title">🌙 Hadiah Istimewa Ramadhan 2026 🌙</div>
+  <div class="top-sub">Vis Artistik • Special Ramadhan Gift</div>
+</div>
+
+<!-- MAIN -->
+<div class="main-wrapper">
+  <div class="moon-deco">🌙</div>
+
+  <!-- Card Hadiah -->
+  <div class="card" id="mainCard">
+    <div class="card-corner tl"></div>
+    <div class="card-corner tr"></div>
+    <div class="card-corner bl"></div>
+    <div class="card-corner br"></div>
+
+    <div class="card-title">🎁 Klaim Hadiah Ramadhan</div>
+    <div class="card-subtitle">Masukkan kode yang tampil untuk klaim hadiah spesialmu!</div>
+
+    <div class="ornament-line"><span>✦ PILIHAN HADIAH ✦</span></div>
+
+    <div class="prize-grid">
+      <div class="prize-box">
+        <span class="pb-icon">🥉</span>
+        <span class="pb-label">Hadiah 3</span>
+        <span class="pb-amount">Rp 150 Jt</span>
+      </div>
+      <div class="prize-box featured">
+        <span class="pb-icon">🏆</span>
+        <span class="pb-label">Hadiah 1</span>
+        <span class="pb-amount">Rp 340 Jt</span>
+      </div>
+      <div class="prize-box">
+        <span class="pb-icon">🥈</span>
+        <span class="pb-label">Hadiah 2</span>
+        <span class="pb-amount">Rp 250 Jt</span>
+      </div>
+    </div>
+
+    <div class="ornament-line"><span>✦ KODE KLAIM ✦</span></div>
+
+    <div class="code-section">
+      <div class="code-label">🔑 Kode Rahasia Hari Ini</div>
+      <div class="code-display">
+        <div class="code-digit" style="--i:0" id="cd0">?</div>
+        <div class="code-digit" style="--i:1" id="cd1">?</div>
+        <div class="code-digit" style="--i:2" id="cd2">?</div>
+        <div class="code-digit" style="--i:3" id="cd3">?</div>
+        <div class="code-digit" style="--i:4" id="cd4">?</div>
+        <div class="code-digit" style="--i:5" id="cd5">?</div>
+      </div>
+      <div class="code-refresh-wrap">
+        <button class="code-refresh" onclick="refreshCode()" title="Acak kode baru">🔄 Acak Kode</button>
+      </div>
+    </div>
+
+    <div class="input-section">
+      <label class="input-label">⌨️ Masukkan Kode di Bawah Ini</label>
+      <div class="code-input-wrap" id="inputWrap">
+        <input type="number" maxlength="1" inputmode="numeric" id="i0" oninput="handleInput(this,0)" onkeydown="handleKey(event,0)" min="0" max="9">
+        <input type="number" maxlength="1" inputmode="numeric" id="i1" oninput="handleInput(this,1)" onkeydown="handleKey(event,1)" min="0" max="9">
+        <input type="number" maxlength="1" inputmode="numeric" id="i2" oninput="handleInput(this,2)" onkeydown="handleKey(event,2)" min="0" max="9">
+        <input type="number" maxlength="1" inputmode="numeric" id="i3" oninput="handleInput(this,3)" onkeydown="handleKey(event,3)" min="0" max="9">
+        <input type="number" maxlength="1" inputmode="numeric" id="i4" oninput="handleInput(this,4)" onkeydown="handleKey(event,4)" min="0" max="9">
+        <input type="number" maxlength="1" inputmode="numeric" id="i5" oninput="handleInput(this,5)" onkeydown="handleKey(event,5)" min="0" max="9">
+      </div>
+      <div class="error-msg" id="errorMsg"></div>
+    </div>
+
+    <button class="btn-claim" id="claimBtn" onclick="claimReward()">
+      🎁 CLAIM HADIAH SEKARANG!
+    </button>
+
+    <div class="info-box">
+      <strong>⚠️ Penting:</strong><br>
+      • Kode ini <strong>hanya sekali pakai</strong>. Setelah diklaim, halaman terkunci permanen.<br>
+      • Hadiah ditambahkan langsung ke saldo <strong>Vis Artistik</strong> di perangkat ini.<br>
+      • Hadiah dipilih secara <strong>acak</strong>: Rp 150 Jt / Rp 250 Jt / Rp 340 Jt.<br>
+      • Pastikan file <strong>vis_Artistik</strong> sudah pernah dibuka di browser ini.
+    </div>
+
+    <div class="footer-text">Vis Artistik × Ramadhan 2026 Special Event</div>
+  </div>
+</div>
+
+<!-- Audio toggle -->
+<div class="audio-ctrl" id="audioCtrl" onclick="toggleMusic()">🔊</div>
+
+<!-- Audio elements -->
+<audio id="bgMusic" loop preload="auto">
+  <source src="ramadhan.mp3" type="audio/mpeg">
+</audio>
+<audio id="sfxClick" src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFhYKAf4CBgoWHiIeHhoWDgoCAgIGCg4OEhISEg4KBgH9/f4CBgoOEhYWFhYSEg4KBgH+AgIGChISFhYWFhISEg4KBgICBgoOEhYWFhYWEg4KBgH+AgIGChISFhYWFhISEg4KBgI"></audio>
+
+<!-- WELCOME POPUP -->
+<div class="popup-bg" id="welcomePopup">
+  <div class="popup-box">
+    <button class="popup-close" onclick="closeWelcome()">✕</button>
+    <span class="popup-moon">🌙</span>
+    <div class="popup-title">Ramadhan Mubarak 2026!</div>
+    <div class="popup-deco">☪️ 🌟 ☪️ 🌟 ☪️</div>
+    <div class="popup-sub">
+      Selamat menyambut bulan suci Ramadhan 1447 H / 2026 M.<br>
+      Semoga ibadah dan amalmu diterima oleh Allah SWT.<br><br>
+      <strong style="color:var(--gold)">Vis Artistik</strong> mempersembahkan hadiah spesial Ramadhan untukmu! 🎁
+    </div>
+    <button class="popup-btn" onclick="closeWelcome()">Aamiin, Buka Hadiah! 🎁</button>
+  </div>
+</div>
+
+<!-- PRIZE POPUP (hidden by default) -->
+<div class="prize-popup-bg" id="prizePopup" style="display:none;">
+  <div class="prize-popup">
+    <div class="confetti-row">🎉🎊🌟✨🎁</div>
+    <h2>🎉 SELAMAT! 🎉</h2>
+    <p>Kamu mendapatkan hadiah Ramadhan spesial dari Vis Artistik!</p>
+    <div class="prize-amount" id="prizeAmount">Rp 0</div>
+    <p id="prizeMsg">Saldo berhasil ditambahkan ke Vis Artistik kamu!</p>
+    <div class="confetti-row">🌙☪️🌟✨🌙</div>
+    <br>
+    <button class="prize-close-btn" onclick="closePrizePopup()">
+      Alhamdulillah! Tutup 🌙
+    </button>
+  </div>
+</div>
+
+<!-- LOCKED OVERLAY (hidden by default) -->
+<div class="locked-overlay" id="lockedOverlay" style="display:none;">
+  <h2>🔒 Terkunci</h2>
+  <p>Hadiah sudah diklaim sebelumnya.<br>Kode hanya bisa digunakan <strong>satu kali</strong>.<br><br>Terima kasih & Ramadhan Mubarak! 🌙</p>
+</div>
+
+<script>
+// ===== CONSTANTS =====
+const IDB_NAME = "LukisankuDB";
+const IDB_VERSION = 1;
+const IDB_STORE = "gameData";
+const GAME_KEY = "lukisanku_pro";
+const CLAIM_KEY = "ramadhan2026_claimed";
+const CODE_KEY = "ramadhan2026_code";
+const PRIZES = [340000000, 250000000, 150000000];
+const PRIZE_LABELS = ["Rp 340.000.000", "Rp 250.000.000", "Rp 150.000.000"];
+
+let currentCode = "";
+let musicOn = false;
+let bgMusic = document.getElementById('bgMusic');
+
+// ===== STARS =====
+function createStars() {
+  const bg = document.getElementById('starsBg');
+  for (let i = 0; i < 60; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 4 + 2;
+    s.style.cssText = `
+      left:${Math.random()*100}%;top:${Math.random()*100}%;
+      width:${size}px;height:${size}px;
+      --d:${(Math.random()*3+1.5).toFixed(1)}s;
+      --dl:${(Math.random()*3).toFixed(1)}s;
+    `;
+    bg.appendChild(s);
+  }
+}
+
+// ===== LANTERNS =====
+function createLanterns() {
+  const colors = ['#e53935','#fb8c00','#fdd835','#43a047','#e53935','#1e88e5'];
+  const container = document.getElementById('lanterns');
+  for (let i = 0; i < 6; i++) {
+    const c = colors[i % colors.length];
+    const strH = Math.floor(Math.random()*30+20);
+    container.innerHTML += `
+      <div class="lantern-wrap">
+        <div class="lantern-string" style="height:${strH}px"></div>
+        <div class="lantern" style="background:${c};">
+          <div class="lantern-inner" style="background:${c};filter:brightness(1.4);"></div>
+          <div class="lantern-glow" style="background:${c};"></div>
+        </div>
+        <div class="lantern-tassel"></div>
+      </div>
+    `;
+  }
+}
+
+// ===== CODE GENERATION =====
+function generateCode() {
+  // Check if code already saved
+  const saved = localStorage.getItem(CODE_KEY);
+  if (saved) { currentCode = saved; displayCode(currentCode); return; }
+  const digits = Array.from({length:6}, () => Math.floor(Math.random()*10)).join('');
+  currentCode = digits;
+  localStorage.setItem(CODE_KEY, digits);
+  displayCode(digits);
+}
+
+function displayCode(code) {
+  for (let i = 0; i < 6; i++) {
+    document.getElementById('cd'+i).textContent = code[i];
+  }
+}
+
+function refreshCode() {
+  playClick();
+  // Only refresh if not yet shown (first time)
+  const digits = Array.from({length:6}, () => Math.floor(Math.random()*10)).join('');
+  currentCode = digits;
+  localStorage.setItem(CODE_KEY, digits);
+  // Animate digits
+  for (let i = 0; i < 6; i++) {
+    const el = document.getElementById('cd'+i);
+    el.style.transform = 'scale(0)';
+    setTimeout(() => {
+      el.textContent = digits[i];
+      el.style.transition = 'transform 0.3s cubic-bezier(0.175,0.885,0.32,1.4)';
+      el.style.transform = 'scale(1)';
+      setTimeout(() => el.style.transition = '', 400);
+    }, i * 80);
+  }
+  // Clear inputs
+  clearInputs();
+}
+
+// ===== INPUT HANDLING =====
+function handleInput(el, idx) {
+  let val = el.value.toString().replace(/\D/g,'');
+  if (val.length > 1) val = val[val.length-1];
+  el.value = val;
+  el.classList.remove('correct','wrong');
+  if (val && idx < 5) {
+    document.getElementById('i'+(idx+1)).focus();
+  }
+  checkFeedback();
+}
+
+function handleKey(e, idx) {
+  if (e.key === 'Backspace') {
+    const el = document.getElementById('i'+idx);
+    if (!el.value && idx > 0) {
+      document.getElementById('i'+(idx-1)).focus();
+    }
+    el.value = '';
+    el.classList.remove('correct','wrong');
+  }
+}
+
+function checkFeedback() {
+  let allFilled = true;
+  for (let i = 0; i < 6; i++) {
+    const val = document.getElementById('i'+i).value;
+    if (!val) { allFilled = false; break; }
+  }
+  if (allFilled) {
+    const entered = Array.from({length:6}, (_,i) => document.getElementById('i'+i).value).join('');
+    for (let i = 0; i < 6; i++) {
+      const el = document.getElementById('i'+i);
+      if (el.value === currentCode[i]) {
+        el.classList.add('correct');
+        el.classList.remove('wrong');
+      } else {
+        el.classList.add('wrong');
+        el.classList.remove('correct');
+      }
+    }
+  }
+}
+
+function clearInputs() {
+  for (let i = 0; i < 6; i++) {
+    const el = document.getElementById('i'+i);
+    el.value = '';
+    el.classList.remove('correct','wrong');
+  }
+  document.getElementById('errorMsg').textContent = '';
+}
+
+function getEnteredCode() {
+  return Array.from({length:6}, (_,i) => document.getElementById('i'+i).value).join('');
+}
+
+// ===== INDEXEDDB HELPERS =====
+let _idb = null;
+function openIDB() {
+  return new Promise((res, rej) => {
+    if (_idb) { res(_idb); return; }
+    const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE);
+    };
+    req.onsuccess = (e) => { _idb = e.target.result; res(_idb); };
+    req.onerror = (e) => rej(e);
+  });
+}
+
+function idbGet(key) {
+  return openIDB().then(db => new Promise((res, rej) => {
+    const tx = db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).get(key);
+    req.onsuccess = () => res(req.result);
+    req.onerror = rej;
+  }));
+}
+
+function idbSet(key, value) {
+  return openIDB().then(db => new Promise((res, rej) => {
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).put(value, key);
+    tx.oncomplete = res;
+    tx.onerror = rej;
+  }));
+}
+
+// ===== CLAIM =====
+async function claimReward() {
+  playClick();
+  const entered = getEnteredCode();
+  if (entered.length < 6) {
+    document.getElementById('errorMsg').textContent = '⚠️ Masukkan semua 6 digit kode!';
+    return;
+  }
+  if (entered !== currentCode) {
+    document.getElementById('errorMsg').textContent = '❌ Kode salah! Periksa kembali.';
+    for (let i = 0; i < 6; i++) {
+      const el = document.getElementById('i'+i);
+      if (el.value !== currentCode[i]) el.classList.add('wrong');
+    }
+    return;
+  }
+
+  document.getElementById('errorMsg').textContent = '';
+  document.getElementById('claimBtn').disabled = true;
+  document.getElementById('claimBtn').textContent = '⏳ Memproses...';
+
+  // Pick random prize
+  const prizeIdx = Math.floor(Math.random() * 3);
+  const prizeAmount = PRIZES[prizeIdx];
+  const prizeLabel = PRIZE_LABELS[prizeIdx];
+
+  try {
+    // Read from IDB
+    let raw = await idbGet(GAME_KEY);
+    let data;
+    if (typeof raw === 'string') {
+      data = JSON.parse(raw);
+    } else if (raw && typeof raw === 'object') {
+      data = raw;
+    } else {
+      // Game data not found — still mark as claimed but warn
+      data = null;
+    }
+
+    if (data) {
+      data.saldo = (data.saldo || 0) + prizeAmount;
+      await idbSet(GAME_KEY, JSON.stringify(data));
+    }
+
+    // Mark as claimed — LOCK
+    localStorage.setItem(CLAIM_KEY, '1');
+
+    // Show prize popup
+    playSuccess();
+    document.getElementById('prizeAmount').textContent = prizeLabel;
+    if (!data) {
+      document.getElementById('prizeMsg').textContent =
+        '⚠️ Data Vis Artistik belum ditemukan. Buka dulu game-nya, lalu coba lagi — atau saldo sudah tersimpan dan akan muncul saat game dimuat.';
+    } else {
+      document.getElementById('prizeMsg').textContent =
+        '✅ Saldo berhasil ditambahkan ke Vis Artistik kamu! Buka game untuk melihat hasilnya.';
+    }
+    document.getElementById('prizePopup').style.display = 'flex';
+
+  } catch (e) {
+    console.error(e);
+    document.getElementById('errorMsg').textContent = '⚠️ Gagal membaca data game. Pastikan Vis Artistik sudah pernah dibuka.';
+    document.getElementById('claimBtn').disabled = false;
+    document.getElementById('claimBtn').textContent = '🎁 CLAIM HADIAH SEKARANG!';
+  }
+}
+
+function closePrizePopup() {
+  playClick();
+  document.getElementById('prizePopup').style.display = 'none';
+  // Show locked
+  document.getElementById('mainCard').style.opacity = '0.3';
+  document.getElementById('mainCard').style.pointerEvents = 'none';
+  document.getElementById('lockedOverlay').style.display = 'flex';
+}
+
+// ===== LOCK CHECK =====
+function checkLocked() {
+  if (localStorage.getItem(CLAIM_KEY) === '1') {
+    document.getElementById('mainCard').style.opacity = '0.3';
+    document.getElementById('mainCard').style.pointerEvents = 'none';
+    document.getElementById('lockedOverlay').style.display = 'flex';
+    return true;
+  }
+  return false;
+}
+
+// ===== WELCOME POPUP =====
+function closeWelcome() {
+  playClick();
+  document.getElementById('welcomePopup').style.display = 'none';
+  // Start music if not already playing
+  if (!musicOn) startMusic();
+}
+
+// ===== AUDIO =====
+function playClick() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.1);
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+    osc.start(); osc.stop(ctx.currentTime + 0.15);
+  } catch(e){}
+}
+
+function playSuccess() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const notes = [523, 659, 784, 1047];
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.12);
+      gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + i * 0.12 + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.4);
+      osc.start(ctx.currentTime + i * 0.12);
+      osc.stop(ctx.currentTime + i * 0.12 + 0.4);
+    });
+  } catch(e){}
+}
+
+function startMusic() {
+  bgMusic.volume = 0.35;
+  bgMusic.play().then(() => {
+    musicOn = true;
+    document.getElementById('audioCtrl').textContent = '🔊';
+  }).catch(() => {
+    musicOn = false;
+    document.getElementById('audioCtrl').textContent = '🔇';
+  });
+}
+
+function tryAutoplay() {
+  bgMusic.volume = 0.35;
+  bgMusic.play().then(() => {
+    musicOn = true;
+    document.getElementById('audioCtrl').textContent = '🔊';
+  }).catch(() => {
+    // Autoplay blocked by browser — will start on first user interaction
+    musicOn = false;
+    document.getElementById('audioCtrl').textContent = '🔇';
+    const startOnInteraction = () => {
+      if (!musicOn) startMusic();
+      document.removeEventListener('click', startOnInteraction);
+      document.removeEventListener('touchstart', startOnInteraction);
+      document.removeEventListener('keydown', startOnInteraction);
+    };
+    document.addEventListener('click', startOnInteraction);
+    document.addEventListener('touchstart', startOnInteraction);
+    document.addEventListener('keydown', startOnInteraction);
+  });
+}
+
+function toggleMusic() {
+  playClick();
+  if (musicOn) {
+    bgMusic.pause();
+    musicOn = false;
+    document.getElementById('audioCtrl').textContent = '🔇';
+  } else {
+    bgMusic.play().then(() => {
+      musicOn = true;
+      document.getElementById('audioCtrl').textContent = '🔊';
+    });
+  }
+}
+
+// ===== localStorage shim (for CLAIM_KEY and CODE_KEY) =====
+// Use real localStorage since this is a separate file
+
+// ===== INIT =====
+window.onload = function() {
+  createStars();
+  createLanterns();
+  generateCode();
+
+  // Always show welcome popup first
+  document.getElementById('welcomePopup').style.display = 'flex';
+
+  // Check if already claimed
+  checkLocked();
+
+  // Try autoplay music immediately on page load
+  tryAutoplay();
+};
+</script>
+</body>
+</html>
