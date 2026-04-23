@@ -189,21 +189,10 @@
         }
 
         #splash-screen {
-            position: fixed; inset: 0; background: #0f172a;
+            position: fixed; inset: 0;
+            background: #0f172a url('vis bg.png') center/cover no-repeat;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             z-index: 9999; transition: opacity 1s ease, visibility 1s;
-        }
-        .splash-content { text-align: center; animation: splashZoom 2.5s ease-out forwards; }
-        .splash-title {
-            font-size: 38px; font-weight: 800;
-            background: linear-gradient(135deg,#fff 30%,var(--accent));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            margin-bottom: 5px; letter-spacing: -1px;
-        }
-        .splash-dev { font-size: 12px; color: #64748b; letter-spacing: 4px; text-transform: uppercase; }
-        @keyframes splashZoom {
-            0%{opacity:0;transform:scale(0.8);} 20%{opacity:1;transform:scale(1);}
-            80%{opacity:1;transform:scale(1.05);} 100%{opacity:0;transform:scale(1.1);}
         }
 
         #register, #game { opacity: 0; width: 100%; max-width: 500px; box-sizing: border-box; }
@@ -1012,83 +1001,10 @@
         .profile-pic-frame-wrap {
             position: relative; display: inline-block;
         }
-        /* ===== IKLAN EVENT RAMADHAN ===== */
-        #ramadhanAdOverlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.75);
-            z-index: 99999;
-            justify-content: center;
-            align-items: center;
-            animation: fadeInAd 0.4s ease;
-        }
-        #ramadhanAdOverlay.active { display: flex; }
-        @keyframes fadeInAd {
-            from { opacity: 0; }
-            to   { opacity: 1; }
-        }
-        #ramadhanAdBox {
-            position: relative;
-            max-width: 340px;
-            width: 88%;
-            border-radius: 18px;
-            overflow: hidden;
-            box-shadow: 0 0 40px rgba(255,180,0,0.35), 0 8px 32px rgba(0,0,0,0.6);
-            animation: popInAd 0.45s cubic-bezier(.175,.885,.32,1.275);
-            cursor: pointer;
-        }
-        @keyframes popInAd {
-            from { transform: scale(0.7); opacity: 0; }
-            to   { transform: scale(1);   opacity: 1; }
-        }
-        #ramadhanAdBox img {
-            display: block;
-            width: 100%;
-            height: auto;
-            border-radius: 18px;
-        }
-        #ramadhanAdClose {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: rgba(20,10,0,0.7);
-            border: 1.5px solid rgba(255,200,80,0.6);
-            color: #ffe080;
-            font-size: 15px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 0 8px rgba(255,200,80,0.7), 0 0 18px rgba(255,160,0,0.4);
-            animation: glowClose 2s ease-in-out infinite alternate;
-            transition: transform 0.15s, background 0.15s;
-            z-index: 10;
-            line-height: 1;
-        }
-        #ramadhanAdClose:hover {
-            background: rgba(255,140,0,0.5);
-            transform: scale(1.15);
-        }
-        @keyframes glowClose {
-            from { box-shadow: 0 0 6px rgba(255,200,80,0.6), 0 0 14px rgba(255,160,0,0.3); }
-            to   { box-shadow: 0 0 14px rgba(255,220,100,1),  0 0 28px rgba(255,180,0,0.7); }
-        }
+
     </style>
 </head>
 <body>
-
-    <!-- ===== IKLAN EVENT RAMADHAN ===== -->
-    <div id="ramadhanAdOverlay">
-        <div id="ramadhanAdBox" onclick="goToRamadhanEvent()">
-            <button id="ramadhanAdClose" onclick="closeRamadhanAd(event)" title="Tutup">✕</button>
-            <img src="event ramadhan.png" alt="Event Ramadhan" draggable="false">
-        </div>
-    </div>
 
 <audio id="sfx-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" preload="auto"></audio>
 <audio id="sfx-money" src="https://assets.mixkit.co/active_storage/sfx/2017/2017-preview.mp3" preload="auto"></audio>
@@ -1123,12 +1039,7 @@
     <span id="msgBadge" class="msg-badge-count hidden">0</span>
 </div>
 
-<div id="splash-screen">
-    <div class="splash-content">
-        <div class="splash-title">Vis Artistik</div>
-        <div class="splash-dev">Developer Mellonvis</div>
-    </div>
-</div>
+<div id="splash-screen"></div>
 
 <div id="tutorialPopup">
     <div id="tutorialEmoji" style="font-size:30px; margin-bottom:10px;">👋</div>
@@ -2626,7 +2537,7 @@ window.onload=async ()=>{
     setTimeout(()=>{
         const splash=document.getElementById('splash-screen');splash.style.opacity='0';splash.style.visibility='hidden';
         const d=JSON.parse(localStorage.getItem(KEY));
-        if(d){loadGame();document.getElementById('game').classList.add('content-visible');showRamadhanAd();}
+        if(d){loadGame();document.getElementById('game').classList.add('content-visible');}
         else{document.getElementById('register').classList.add('content-visible');}
     },2500);
 };
@@ -2920,7 +2831,7 @@ function draw(e){
 
 function fillCanvas(){if(!currentActiveCanvas)return;saveHistory();ctx.setLineDash([]);ctx.fillStyle=colorPicker.value;ctx.fillRect(0,0,canvas.width,canvas.height);usedColors.add(colorPicker.value);strokes+=50;}
 function pick(c){colorPicker.value=c;}
-function clearCanvas(){ctx.setLineDash([]);ctx.globalAlpha=1.0;ctx.clearRect(0,0,canvas.width,canvas.height);usedColors.clear();usedBrushes.clear();usedBrushes.add('normal');strokes=0;points=[];historyStep=[];}
+function clearCanvas(){ctx.setLineDash([]);ctx.globalAlpha=1.0;ctx.clearRect(0,0,canvas.width,canvas.height);usedColors.clear();usedBrushes.clear();usedBrushes.add('normal');strokes=0;points=[];historyStep=[];canvasZoom=1;applyCanvasZoom();}
 
 function calculatePrice(){const area=points.length?(Math.max(...points.map(p=>p.x))-Math.min(...points.map(p=>p.x)))*(Math.max(...points.map(p=>p.y))-Math.min(...points.map(p=>p.y)))/100:0;const brushBonus=(usedBrushes.size-(usedBrushes.has('eraser')?1:0))*5000;const canvasBonus=currentActiveCanvas==='vertical'?50000:(currentActiveCanvas==='horizontal'?25000:0);const d=JSON.parse(localStorage.getItem(KEY));const supplyBonus=(d.supplies&&d.supplies.premium?20000:0)+(d.supplies&&d.supplies.goldpalette?30000:0);return Math.min(5000+(usedColors.size*12000)+(strokes*150)+area+brushBonus+canvasBonus+supplyBonus+(Math.random()*40000),10000000)|0;}
 
@@ -2955,33 +2866,70 @@ function hapusAkun(){if(confirm("Hapus semua data?")){stopBannerSlideshow();if(c
 canvas.addEventListener("mousedown",startPaint);
 window.addEventListener("mouseup",(e)=>endPaint(e));
 canvas.addEventListener("mousemove",draw);
-canvas.addEventListener("touchstart",(e)=>{startPaint(e);e.preventDefault();},{passive:false});
-canvas.addEventListener("touchend",(e)=>{endPaint(e);e.preventDefault();},{passive:false});
-canvas.addEventListener("touchmove",(e)=>{draw(e);e.preventDefault();},{passive:false});
 
-// ===== IKLAN EVENT RAMADHAN =====
-function showRamadhanAd() {
-    const overlay = document.getElementById('ramadhanAdOverlay');
-    if (overlay) {
-        overlay.classList.add('active');
+// ===== PINCH ZOOM SYSTEM =====
+let canvasZoom = 1;
+let isPinching = false;
+let pinchStartDist = 0;
+let pinchStartZoom = 1;
+
+function getPinchDist(e) {
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    return Math.sqrt(dx*dx + dy*dy);
+}
+
+function applyCanvasZoom() {
+    canvas.style.transform = `scale(${canvasZoom})`;
+    canvas.style.transformOrigin = 'center center';
+    const wrap = document.getElementById('canvasWrap');
+    if(canvasZoom > 1.01) {
+        wrap.style.overflow = 'visible';
+    } else {
+        wrap.style.overflow = 'hidden';
     }
 }
-function closeRamadhanAd(e) {
-    if (e) { e.stopPropagation(); e.preventDefault(); }
-    const overlay = document.getElementById('ramadhanAdOverlay');
-    if (overlay) {
-        overlay.style.transition = 'opacity 0.3s ease';
-        overlay.style.opacity = '0';
-        setTimeout(() => {
-            overlay.classList.remove('active');
-            overlay.style.opacity = '';
-            overlay.style.transition = '';
-        }, 300);
+
+canvas.addEventListener("touchstart",(e)=>{
+    if(e.touches.length === 2) {
+        isPinching = true;
+        painting = false;
+        ctx.beginPath();
+        pinchStartDist = getPinchDist(e);
+        pinchStartZoom = canvasZoom;
+        e.preventDefault();
+    } else if(e.touches.length === 1 && !isPinching) {
+        startPaint(e);
+        e.preventDefault();
     }
-}
-function goToRamadhanEvent() {
-    window.location.href = 'Claim event ramadhan.html';
-}
+},{passive:false});
+
+canvas.addEventListener("touchend",(e)=>{
+    if(isPinching) {
+        if(e.touches.length < 2) {
+            isPinching = false;
+            painting = false;
+            ctx.beginPath();
+        }
+        e.preventDefault();
+    } else {
+        endPaint(e);
+        e.preventDefault();
+    }
+},{passive:false});
+
+canvas.addEventListener("touchmove",(e)=>{
+    if(isPinching && e.touches.length === 2) {
+        const dist = getPinchDist(e);
+        canvasZoom = Math.min(5, Math.max(0.5, pinchStartZoom * (dist / pinchStartDist)));
+        applyCanvasZoom();
+        e.preventDefault();
+    } else if(!isPinching && e.touches.length === 1) {
+        draw(e);
+        e.preventDefault();
+    }
+},{passive:false});
+
 </script>
 </body>
-</html>
+    </html>
