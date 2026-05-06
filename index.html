@@ -854,25 +854,102 @@
         .leaderboard-refresh {
             font-size: 10px; color: rgba(148,163,184,0.7); font-style: italic;
         }
+        /* Podium top-3 wrapper */
+        .lb-podium {
+            display: flex; align-items: flex-end; justify-content: center;
+            gap: 8px; margin-bottom: 14px;
+        }
+        .lb-podium-card {
+            display: flex; flex-direction: column; align-items: center;
+            border-radius: 18px; padding: 10px 8px 8px;
+            position: relative; overflow: hidden; cursor: default;
+            flex: 1; max-width: 110px;
+        }
+        .lb-podium-card.pos-1 {
+            background: linear-gradient(160deg,rgba(251,191,36,0.22),rgba(245,158,11,0.10));
+            border: 2px solid rgba(251,191,36,0.7);
+            box-shadow: 0 0 22px rgba(251,191,36,0.25), 0 0 6px rgba(251,191,36,0.15);
+            animation: podiumFlash1 2.2s ease-in-out infinite;
+        }
+        .lb-podium-card.pos-2 {
+            background: linear-gradient(160deg,rgba(148,163,184,0.18),rgba(100,116,139,0.08));
+            border: 2px solid rgba(148,163,184,0.55);
+            box-shadow: 0 0 14px rgba(148,163,184,0.18);
+            animation: podiumFlash2 2.8s ease-in-out infinite;
+        }
+        .lb-podium-card.pos-3 {
+            background: linear-gradient(160deg,rgba(180,120,60,0.18),rgba(146,64,14,0.08));
+            border: 2px solid rgba(180,120,60,0.55);
+            box-shadow: 0 0 14px rgba(180,120,60,0.18);
+            animation: podiumFlash3 3.2s ease-in-out infinite;
+        }
+        @keyframes podiumFlash1 {
+            0%,100%{box-shadow:0 0 18px rgba(251,191,36,0.2),0 0 4px rgba(251,191,36,0.1);}
+            50%{box-shadow:0 0 35px rgba(251,191,36,0.6),0 0 12px rgba(251,191,36,0.4),inset 0 0 20px rgba(251,191,36,0.08);}
+        }
+        @keyframes podiumFlash2 {
+            0%,100%{box-shadow:0 0 10px rgba(148,163,184,0.12);}
+            50%{box-shadow:0 0 26px rgba(148,163,184,0.45),0 0 8px rgba(148,163,184,0.3);}
+        }
+        @keyframes podiumFlash3 {
+            0%,100%{box-shadow:0 0 10px rgba(180,120,60,0.12);}
+            50%{box-shadow:0 0 24px rgba(180,120,60,0.45),0 0 8px rgba(180,120,60,0.3);}
+        }
+        /* Sweep shine on podium */
+        .lb-podium-card::before {
+            content:''; position:absolute; top:0; left:-80%;
+            width:60%; height:100%;
+            background: linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);
+            transform: skewX(-20deg);
+        }
+        .lb-podium-card.pos-1::before { animation: podiumShine 2.2s ease-in-out infinite; }
+        .lb-podium-card.pos-2::before { animation: podiumShine 2.8s ease-in-out infinite 0.4s; }
+        .lb-podium-card.pos-3::before { animation: podiumShine 3.2s ease-in-out infinite 0.8s; }
+        @keyframes podiumShine {
+            0%{left:-80%;opacity:0;} 30%{opacity:1;} 60%{left:130%;opacity:0;} 100%{left:130%;opacity:0;}
+        }
+        .lb-podium-medal {
+            font-size: 28px; margin-bottom: 4px; display: block;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+        }
+        .lb-podium-card.pos-1 .lb-podium-medal { animation: medalBounce 2.2s ease-in-out infinite; }
+        @keyframes medalBounce {
+            0%,100%{transform:translateY(0) rotate(-3deg);}
+            50%{transform:translateY(-5px) rotate(3deg);}
+        }
+        .lb-podium-avatar {
+            font-size: 26px; width: 44px; height: 44px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; margin-bottom: 5px; position: relative;
+        }
+        .pos-1 .lb-podium-avatar { background:rgba(251,191,36,0.25); border:2px solid rgba(251,191,36,0.7); box-shadow:0 0 10px rgba(251,191,36,0.4); }
+        .pos-2 .lb-podium-avatar { background:rgba(148,163,184,0.2); border:2px solid rgba(148,163,184,0.5); }
+        .pos-3 .lb-podium-avatar { background:rgba(180,120,60,0.2); border:2px solid rgba(180,120,60,0.5); }
+        .lb-podium-name {
+            font-size: 10px; font-weight: 800; text-align: center;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            width: 100%; max-width: 96px;
+        }
+        .pos-1 .lb-podium-name { color: #fbbf24; }
+        .pos-2 .lb-podium-name { color: #cbd5e1; }
+        .pos-3 .lb-podium-name { color: #d97706; }
+        .lb-podium-saldo { font-size: 9px; opacity: 0.75; margin-top: 2px; font-weight: 700; }
+        .lb-podium-bar { width: 100%; border-radius: 0 0 10px 10px; margin-top: 6px; }
+        .pos-1 .lb-podium-bar { height: 48px; background: linear-gradient(0deg,rgba(251,191,36,0.35),transparent); }
+        .pos-2 .lb-podium-bar { height: 32px; background: linear-gradient(0deg,rgba(148,163,184,0.3),transparent); }
+        .pos-3 .lb-podium-bar { height: 24px; background: linear-gradient(0deg,rgba(180,120,60,0.3),transparent); }
+        .lb-podium-me-tag {
+            font-size: 8px; font-weight: 900; color: var(--accent);
+            background: rgba(139,92,246,0.25); padding: 1px 5px; border-radius: 5px;
+            margin-top: 2px; display: inline-block;
+        }
+        /* rest of leaderboard list (rank 4+) */
         .leaderboard-list { display: flex; flex-direction: column; gap: 8px; }
         .leaderboard-item {
             display: flex; align-items: center; gap: 10px;
             background: rgba(15,23,42,0.3); padding: 10px 12px;
             border-radius: 14px; border: 1px solid rgba(51,65,85,0.4);
             transition: all 0.3s ease; position: relative; overflow: hidden;
-        }
-        .leaderboard-item.rank-1 {
-            border-color: rgba(251,191,36,0.6);
-            background: rgba(251,191,36,0.08);
-            box-shadow: 0 0 14px rgba(251,191,36,0.12);
-        }
-        .leaderboard-item.rank-2 {
-            border-color: rgba(148,163,184,0.5);
-            background: rgba(148,163,184,0.06);
-        }
-        .leaderboard-item.rank-3 {
-            border-color: rgba(180,120,60,0.5);
-            background: rgba(180,120,60,0.06);
         }
         .leaderboard-item.is-me {
             border-color: rgba(139,92,246,0.6);
@@ -881,12 +958,9 @@
         .lb-rank-badge {
             width: 28px; height: 28px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 14px; font-weight: 800; flex-shrink: 0;
+            font-size: 13px; font-weight: 800; flex-shrink: 0;
             background: rgba(51,65,85,0.5); color: rgba(148,163,184,0.8);
         }
-        .lb-rank-badge.gold { background: linear-gradient(135deg,#f59e0b,#fbbf24); color:#0f172a; box-shadow: 0 2px 8px rgba(251,191,36,0.4); }
-        .lb-rank-badge.silver { background: linear-gradient(135deg,#94a3b8,#cbd5e1); color:#0f172a; }
-        .lb-rank-badge.bronze { background: linear-gradient(135deg,#a16207,#d97706); color:#fff; }
         .lb-avatar {
             font-size: 22px; width: 36px; height: 36px;
             display: flex; align-items: center; justify-content: center;
@@ -902,10 +976,6 @@
             font-size: 11px; font-weight: 800; color: var(--gold);
             text-align: right; flex-shrink: 0;
         }
-        .lb-crown {
-            position: absolute; top: -2px; right: 8px;
-            font-size: 16px; opacity: 0.6;
-        }
         .lb-me-label {
             font-size: 9px; font-weight: 800; color: var(--accent);
             background: rgba(139,92,246,0.2); padding: 2px 6px;
@@ -919,6 +989,103 @@
         .lb-update-note {
             text-align: center; font-size: 10px; color: rgba(148,163,184,0.5);
             margin-top: 10px; font-style: italic;
+        }
+
+        /* ===== SPIN WHEEL MODAL ===== */
+        #spinModal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+            display: none; justify-content: center; align-items: center;
+            z-index: 5500; flex-direction: column;
+        }
+        .spin-box {
+            background: var(--card); border-radius: 28px;
+            padding: 22px 18px 20px; text-align: center;
+            border: 2px solid var(--gold);
+            box-shadow: 0 0 40px rgba(251,191,36,0.3);
+            animation: rewardPop 0.45s cubic-bezier(0.175,0.885,0.32,1.275);
+            width: 310px; max-width: 92vw; position: relative; overflow: hidden;
+        }
+        .spin-box::before {
+            content:''; position:absolute; inset:0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(251,191,36,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .spin-title { font-size: 18px; font-weight: 900; color: var(--gold); margin-bottom: 4px; }
+        .spin-subtitle { font-size: 11px; opacity: 0.6; margin-bottom: 14px; }
+        .spin-canvas-wrap {
+            position: relative; display: inline-block; margin-bottom: 14px;
+        }
+        #spinCanvas { border-radius: 50%; display: block; }
+        .spin-pointer {
+            position: absolute; top: -14px; left: 50%;
+            transform: translateX(-50%);
+            width: 0; height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 26px solid #ef4444;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+            z-index: 2;
+        }
+        .spin-glow {
+            position: absolute; inset: -6px; border-radius: 50%;
+            background: conic-gradient(
+                rgba(251,191,36,0.4) 0deg, rgba(139,92,246,0.4) 60deg,
+                rgba(59,130,246,0.4) 120deg, rgba(16,185,129,0.4) 180deg,
+                rgba(239,68,68,0.4) 240deg, rgba(251,191,36,0.4) 300deg,
+                rgba(251,191,36,0.4) 360deg
+            );
+            filter: blur(10px); opacity: 0; z-index: -1;
+            transition: opacity 0.5s;
+        }
+        .spin-canvas-wrap.spinning .spin-glow { opacity: 1; }
+        #spinBtn {
+            width: 100%; padding: 13px; border: none; border-radius: 14px;
+            background: linear-gradient(135deg,#f59e0b,#fbbf24,#f59e0b);
+            background-size: 200% 100%;
+            color: #0f172a; font-size: 16px; font-weight: 900;
+            cursor: pointer; letter-spacing: 0.5px;
+            transition: transform 0.1s, opacity 0.2s;
+            animation: shineSpin 2s linear infinite;
+        }
+        @keyframes shineSpin {
+            0%{background-position:200% 0;} 100%{background-position:-200% 0;}
+        }
+        #spinBtn:disabled { opacity: 0.4; cursor: not-allowed; animation: none; }
+        #spinBtn:not(:disabled):active { transform: scale(0.97); }
+        .spin-result-text {
+            font-size: 15px; font-weight: 800; color: var(--gold);
+            min-height: 22px; margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+        .spin-close-btn {
+            margin-top: 10px; background: none; border: 1px solid rgba(51,65,85,0.6);
+            color: var(--text); padding: 7px 20px; border-radius: 10px;
+            font-size: 12px; cursor: pointer; opacity: 0.7;
+        }
+        .spin-close-btn:active { transform: scale(0.97); }
+
+        /* ===== PROFILE PIC & SHOP NAME FLASH ===== */
+        @keyframes profileGlow {
+            0%,100%{box-shadow:0 0 8px rgba(139,92,246,0.3), 0 4px 15px rgba(0,0,0,0.3);}
+            33%{box-shadow:0 0 20px rgba(251,191,36,0.6), 0 0 8px rgba(251,191,36,0.4);}
+            66%{box-shadow:0 0 18px rgba(59,130,246,0.5), 0 0 6px rgba(139,92,246,0.4);}
+        }
+        .profile-pic { animation: profileGlow 3.5s ease-in-out infinite; }
+        @keyframes shopTitleShine {
+            0%,100%{filter:drop-shadow(0 2px 4px rgba(0,0,0,0.4)) brightness(1);}
+            40%{filter:drop-shadow(0 0 10px rgba(251,191,36,0.7)) brightness(1.15);}
+            60%{filter:drop-shadow(0 0 14px rgba(139,92,246,0.6)) brightness(1.1);}
+        }
+        #shopTitle { animation: shopTitleShine 4s ease-in-out infinite; }
+        /* shop name sparkle particles */
+        .shop-sparkle {
+            position: absolute; pointer-events: none; z-index: 10;
+            animation: sparkleFly 1.4s ease-out forwards;
+            font-size: 10px; line-height: 1;
+        }
+        @keyframes sparkleFly {
+            0%{opacity:1;transform:scale(0.5) translateY(0);}
+            100%{opacity:0;transform:scale(1.4) translateY(-22px);}
         }
 
         /* ===== TOKO BINGKAI ===== */
@@ -1032,7 +1199,7 @@
     <div id="lightning"></div>
 </div>
 
-<div id="giftBtn" class="gift-float" onclick="claimDailyGift()">🎁</div>
+<div id="giftBtn" class="gift-float" onclick="openSpinModal()">🎁</div>
 <div id="settingsBtn" class="settings-float" onclick="toggleSettings()">⚙</div>
 <div id="messageBtn" class="message-float" onclick="openMessageModal()">
     💌
@@ -1053,6 +1220,22 @@
         <h2 style="color:var(--gold); margin:10px 0;">Kejutan!</h2>
         <p id="rewardText" style="font-size:14px; line-height:1.6;"></p>
         <button class="sell-btn" style="background:var(--success); margin-top:20px;" onclick="closeReward()">Terima Kasih!</button>
+    </div>
+</div>
+
+<!-- SPIN WHEEL MODAL -->
+<div id="spinModal">
+    <div class="spin-box">
+        <div class="spin-title">🎡 Spin Hadiah Harian</div>
+        <div class="spin-subtitle">Spin sekali sehari untuk menang!</div>
+        <div class="spin-canvas-wrap" id="spinCanvasWrap">
+            <div class="spin-glow" id="spinGlow"></div>
+            <div class="spin-pointer"></div>
+            <canvas id="spinCanvas" width="260" height="260"></canvas>
+        </div>
+        <div class="spin-result-text" id="spinResultText"></div>
+        <button id="spinBtn" onclick="doSpin()">🎰 SPIN SEKARANG!</button>
+        <button class="spin-close-btn" onclick="closeSpinModal()">Tutup</button>
     </div>
 </div>
 
@@ -2486,17 +2669,187 @@ const cycleDuration=3*60*1000;
 function toggleDayNight(){isDay=!isDay;const ts=document.getElementById('timeStatus');if(isDay){document.body.classList.add('day-mode');ts.innerText="Siang";ts.style.color="#ea580c";}else{document.body.classList.remove('day-mode');ts.innerText="Malam";ts.style.color="#3b82f6";}}
 setInterval(toggleDayNight,cycleDuration);
 
-function claimDailyGift(){
-    const d=JSON.parse(localStorage.getItem(KEY));if(!d)return;
-    const today=new Date().toDateString();
-    if(d.lastGiftDate===today){showToast('Sudah Diklaim','Kembali besok ya!','info','📦');return;}
+// ===== SPIN WHEEL SYSTEM =====
+const SPIN_PRIZES = [
+    {label:'Rp 25rb',   type:'money',  value:25000,      color:'#10b981', text:'#fff'},
+    {label:'Kanvas\nSquare', type:'canvas', value:'square',  color:'#8b5cf6', text:'#fff'},
+    {label:'Rp 100rb',  type:'money',  value:100000,     color:'#fbbf24', text:'#0f172a'},
+    {label:'Kanvas\nHoriz',  type:'canvas', value:'horizontal', color:'#3b82f6', text:'#fff'},
+    {label:'Rp 50rb',   type:'money',  value:50000,      color:'#ef4444', text:'#fff'},
+    {label:'Kanvas\nVertikal', type:'canvas', value:'vertical', color:'#f472b6', text:'#fff'},
+    {label:'Rp 200rb',  type:'money',  value:200000,     color:'#f59e0b', text:'#0f172a'},
+    {label:'Rp 500rb',  type:'money',  value:500000,     color:'#06b6d4', text:'#fff'},
+];
+const SPIN_TOTAL = SPIN_PRIZES.length;
+const SPIN_SLICE = (Math.PI * 2) / SPIN_TOTAL;
+let spinAngle = 0;
+let spinSpinning = false;
+
+function drawSpinWheel(angle) {
+    const cv = document.getElementById('spinCanvas');
+    if (!cv) return;
+    const c = cv.getContext('2d');
+    const W = cv.width, H = cv.height;
+    const cx = W / 2, cy = H / 2, r = cx - 8;
+    c.clearRect(0, 0, W, H);
+
+    // Outer glow ring
+    const grad = c.createRadialGradient(cx,cy,r-4,cx,cy,r+6);
+    grad.addColorStop(0,'rgba(251,191,36,0.5)');
+    grad.addColorStop(1,'rgba(251,191,36,0)');
+    c.fillStyle = grad;
+    c.beginPath(); c.arc(cx,cy,r+6,0,Math.PI*2); c.fill();
+
+    SPIN_PRIZES.forEach((prize, i) => {
+        const startA = angle + i * SPIN_SLICE;
+        const endA = startA + SPIN_SLICE;
+        // Slice fill
+        c.beginPath();
+        c.moveTo(cx, cy);
+        c.arc(cx, cy, r, startA, endA);
+        c.closePath();
+        c.fillStyle = prize.color;
+        c.fill();
+        // Slice border
+        c.strokeStyle = 'rgba(0,0,0,0.25)';
+        c.lineWidth = 2;
+        c.stroke();
+
+        // Text
+        c.save();
+        c.translate(cx, cy);
+        c.rotate(startA + SPIN_SLICE / 2);
+        c.textAlign = 'right';
+        c.fillStyle = prize.text;
+        c.font = 'bold 10px Inter,sans-serif';
+        const lines = prize.label.split('\n');
+        if (lines.length > 1) {
+            c.fillText(lines[0], r - 10, -5);
+            c.fillText(lines[1], r - 10,  8);
+        } else {
+            c.fillText(prize.label, r - 10, 4);
+        }
+        c.restore();
+    });
+
+    // Center circle
+    const cg = c.createRadialGradient(cx,cy,0,cx,cy,30);
+    cg.addColorStop(0,'#334155');
+    cg.addColorStop(1,'#1e293b');
+    c.beginPath(); c.arc(cx,cy,28,0,Math.PI*2);
+    c.fillStyle = cg; c.fill();
+    c.strokeStyle='rgba(251,191,36,0.7)'; c.lineWidth=2.5; c.stroke();
+    c.fillStyle='#fbbf24'; c.font='bold 15px Inter,sans-serif'; c.textAlign='center'; c.textBaseline='middle';
+    c.fillText('🎡', cx, cy);
+}
+
+function openSpinModal() {
+    const d = JSON.parse(localStorage.getItem(KEY)); if (!d) return;
+    const today = new Date().toDateString();
+    const modal = document.getElementById('spinModal');
+    modal.style.display = 'flex';
+    spinAngle = 0;
+    drawSpinWheel(spinAngle);
+    document.getElementById('spinResultText').textContent = '';
+    const alreadySpun = d.lastGiftDate === today;
+    const btn = document.getElementById('spinBtn');
+    btn.disabled = alreadySpun;
+    if (alreadySpun) {
+        document.getElementById('spinResultText').textContent = '✅ Sudah spin hari ini. Kembali besok!';
+    }
+}
+function closeSpinModal() { document.getElementById('spinModal').style.display = 'none'; }
+
+function doSpin() {
+    const d = JSON.parse(localStorage.getItem(KEY)); if (!d) return;
+    const today = new Date().toDateString();
+    if (d.lastGiftDate === today) { showToast('Sudah Diklaim','Kembali besok ya!','info','📦'); return; }
+    if (spinSpinning) return;
+    spinSpinning = true;
+    document.getElementById('spinBtn').disabled = true;
+    document.getElementById('spinResultText').textContent = '';
+    document.getElementById('spinCanvasWrap').classList.add('spinning');
     playSFX('sfx-whistle');
-    const isMoney=Math.random()>0.4;let rewardMsg="";
-    if(isMoney){const money=Math.floor(Math.random()*(500000-25000+1))+25000;d.saldo+=money;rewardMsg='Selamat! Hadiah Rp '+money.toLocaleString('id-ID')+'!';}
-    else{const types=['square','horizontal','vertical'];const rt=types[Math.floor(Math.random()*types.length)];d.inventory[rt]=(d.inventory[rt]||0)+1;rewardMsg='Selamat! Hadiah 1 Kanvas '+rt.toUpperCase()+'!';}
-    d.lastGiftDate=today;localStorage.setItem(KEY,JSON.stringify(d));
-    document.getElementById('rewardText').innerText=rewardMsg;document.getElementById('rewardModal').style.display='flex';
-    playSFX('sfx-money');updateBalanceDisplay(d.saldo);updateInventoryUI();
+
+    // Pick weighted random prize (index)
+    const prizeIdx = Math.floor(Math.random() * SPIN_TOTAL);
+    // Target angle: land pointer (top = -PI/2) on prizeIdx
+    // Pointer at top means angle offset = -PI/2
+    // We need: spinAngle + prizeIdx*SPIN_SLICE + SPIN_SLICE/2 = -PI/2 + 2*PI*k  (some full rotations)
+    const fullSpins = 5 + Math.floor(Math.random() * 4); // 5-8 full rotations
+    const targetSliceAngle = -(prizeIdx * SPIN_SLICE + SPIN_SLICE / 2) - Math.PI / 2;
+    const finalAngle = targetSliceAngle + Math.PI * 2 * fullSpins;
+
+    const startAngle = spinAngle;
+    const duration = 4000 + Math.random() * 1500;
+    const startTime = performance.now();
+
+    function easeOut(t) { return 1 - Math.pow(1 - t, 4); }
+
+    function animSpin(now) {
+        const elapsed = now - startTime;
+        const t = Math.min(elapsed / duration, 1);
+        spinAngle = startAngle + (finalAngle - startAngle) * easeOut(t);
+        drawSpinWheel(spinAngle);
+        if (t < 1) {
+            requestAnimationFrame(animSpin);
+        } else {
+            spinAngle = finalAngle % (Math.PI * 2);
+            spinSpinning = false;
+            document.getElementById('spinCanvasWrap').classList.remove('spinning');
+            // Apply reward
+            const prize = SPIN_PRIZES[prizeIdx];
+            if (prize.type === 'money') {
+                d.saldo += prize.value;
+                document.getElementById('spinResultText').textContent = '🎉 Menang Rp ' + prize.value.toLocaleString('id-ID') + '!';
+                showToast('Jackpot!', '+Rp ' + prize.value.toLocaleString('id-ID'), 'gold', '💰', 4000);
+            } else {
+                d.inventory[prize.value] = (d.inventory[prize.value] || 0) + 1;
+                const labels = {square:'Square', horizontal:'Horizontal', vertical:'Vertikal'};
+                document.getElementById('spinResultText').textContent = '🎉 Dapat Kanvas ' + labels[prize.value] + '!';
+                showToast('Kanvas Gratis!', 'Kanvas ' + labels[prize.value] + ' ditambahkan', 'gold', '🖼️', 4000);
+            }
+            d.lastGiftDate = today;
+            localStorage.setItem(KEY, JSON.stringify(d));
+            playSFX('sfx-money');
+            updateBalanceDisplay(d.saldo);
+            updateInventoryUI();
+            // Confetti burst
+            for (let i = 0; i < 18; i++) _spawnConfetti();
+        }
+    }
+    requestAnimationFrame(animSpin);
+}
+
+function _spawnConfetti() {
+    const colors = ['#fbbf24','#8b5cf6','#10b981','#ef4444','#3b82f6','#f472b6'];
+    const el = document.createElement('div');
+    el.style.cssText = 'position:fixed;width:8px;height:8px;border-radius:2px;pointer-events:none;z-index:9900;';
+    el.style.background = colors[Math.floor(Math.random()*colors.length)];
+    let cx = window.innerWidth * (0.4 + Math.random() * 0.2);
+    let cy = window.innerHeight * 0.42;
+    el.style.left = cx + 'px';
+    el.style.top = cy + 'px';
+    document.body.appendChild(el);
+    const angle = (Math.random() * Math.PI * 2);
+    const dist = 80 + Math.random() * 120;
+    const st = performance.now();
+    (function anim(now) {
+        const t = (now - st) / 1200;
+        if (t > 1) { el.remove(); return; }
+        cx += Math.cos(angle) * dist * 0.016;
+        cy += Math.sin(angle) * dist * 0.016 + t * t * 80 * 0.016;
+        el.style.left = cx + 'px';
+        el.style.top = cy + 'px';
+        el.style.opacity = 1 - t;
+        el.style.transform = 'rotate(' + (t * 540) + 'deg)';
+        requestAnimationFrame(anim);
+    })(performance.now());
+}
+
+function claimDailyGift(){
+    // Legacy fallback — now opens spin
+    openSpinModal();
 }
 function closeReward(){document.getElementById('rewardModal').style.display='none';}
 
@@ -2659,6 +3012,29 @@ function loadGame(){
     // Refresh leaderboard label every minute
     setInterval(renderLeaderboard, 60000);
     loadBingkaiOnStart();
+    // Draw initial spin wheel
+    setTimeout(()=>{ drawSpinWheel(0); }, 300);
+    // Sparkle on shop title periodically
+    setInterval(_shopTitleSparkle, 3500);
+}
+
+function _shopTitleSparkle() {
+    const el = document.getElementById('shopTitle');
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    if (rect.width === 0) return;
+    const sparks = ['✦','✧','⋆','★'];
+    for (let i = 0; i < 3; i++) {
+        const s = document.createElement('span');
+        s.className = 'shop-sparkle';
+        s.textContent = sparks[Math.floor(Math.random() * sparks.length)];
+        s.style.left = (rect.left + Math.random() * rect.width) + 'px';
+        s.style.top = (rect.top + Math.random() * rect.height) + 'px';
+        s.style.color = ['#fbbf24','#8b5cf6','#38bdf8'][Math.floor(Math.random()*3)];
+        s.style.animationDelay = (i * 0.15) + 's';
+        document.body.appendChild(s);
+        setTimeout(() => s.remove(), 1600);
+    }
 }
 
 function updateBalanceDisplay(val){const el=document.getElementById("saldo");el.innerText=val.toLocaleString("id-ID");el.parentElement.classList.remove('pop');void el.parentElement.offsetWidth;el.parentElement.classList.add('pop');updateBadge(val);renderLeaderboard();}
@@ -2731,52 +3107,56 @@ function renderLeaderboard() {
     const seed = getLeaderboardSeed();
     const npcs = generateNpcLeaderboard(seed);
     const playerSaldo = d.saldo || 0;
-    const playerName = d.shopName || "Toko Kamu";
+    const playerName = d.shopName || d.shop || "Toko Kamu";
 
-    // Gabung player + NPC, sort berdasarkan saldo
     const allEntries = [
         ...npcs,
         { name: playerName, emoji: "🧑‍🎨", saldo: playerSaldo, isNpc: false }
     ].sort((a, b) => b.saldo - a.saldo);
 
-    const rankBadgeClass = (rank) => {
-        if (rank === 1) return 'gold';
-        if (rank === 2) return 'silver';
-        if (rank === 3) return 'bronze';
-        return '';
-    };
-    const rankEmoji = (rank) => {
-        if (rank === 1) return '🥇';
-        if (rank === 2) return '🥈';
-        if (rank === 3) return '🥉';
-        return rank;
-    };
+    // === PODIUM TOP 3 ===
+    const podiumOrder = [1, 0, 2]; // display: 2nd, 1st, 3rd
+    const podiumClasses = ['pos-2', 'pos-1', 'pos-3'];
+    const podiumMedals = ['🥈', '🥇', '🥉'];
 
-    lbList.innerHTML = '';
-    allEntries.forEach((entry, idx) => {
-        const rank = idx + 1;
+    // Build podium HTML
+    let podiumHTML = '<div class="lb-podium">';
+    podiumOrder.forEach((entryIdx, pIdx) => {
+        const entry = allEntries[entryIdx];
+        if (!entry) return;
         const isMe = !entry.isNpc;
-        const item = document.createElement('div');
-        item.className = 'leaderboard-item' +
-            (rank === 1 ? ' rank-1' : rank === 2 ? ' rank-2' : rank === 3 ? ' rank-3' : '') +
-            (isMe ? ' is-me' : '');
-        item.style.animationDelay = (idx * 0.05) + 's';
+        const cls = podiumClasses[pIdx];
+        const medal = podiumMedals[pIdx];
+        podiumHTML += `
+        <div class="lb-podium-card ${cls}">
+            <span class="lb-podium-medal">${medal}</span>
+            <div class="lb-podium-avatar">${entry.emoji}</div>
+            <div class="lb-podium-name">${entry.name}</div>
+            ${isMe ? '<div class="lb-podium-me-tag">KAMU</div>' : ''}
+            <div class="lb-podium-saldo">Rp ${formatShort(entry.saldo)}</div>
+            <div class="lb-podium-bar"></div>
+        </div>`;
+    });
+    podiumHTML += '</div>';
 
-        const badgeCls = rankBadgeClass(rank);
-        const rankDisplay = rank <= 3 ? rankEmoji(rank) : rank;
-
-        item.innerHTML = `
-            <div class="lb-rank-badge ${badgeCls}">${rankDisplay}</div>
+    // === REST LIST (rank 4+) ===
+    let listHTML = '';
+    allEntries.slice(3).forEach((entry, idx) => {
+        const rank = idx + 4;
+        const isMe = !entry.isNpc;
+        listHTML += `
+        <div class="leaderboard-item${isMe ? ' is-me' : ''}" style="animation-delay:${(idx * 0.04)}s">
+            <div class="lb-rank-badge">${rank}</div>
             <div class="lb-avatar">${entry.emoji}</div>
             <div class="lb-info">
                 <div class="lb-name">${entry.name}${isMe ? '<span class="lb-me-label">KAMU</span>' : ''}</div>
                 <div class="lb-badge">${getBadgeForSaldo(entry.saldo)} ${getRankNameForSaldo(entry.saldo)}</div>
             </div>
             <div class="lb-saldo">Rp ${formatShort(entry.saldo)}</div>
-            ${rank === 1 ? '<div class="lb-crown">👑</div>' : ''}
-        `;
-        lbList.appendChild(item);
+        </div>`;
     });
+
+    lbList.innerHTML = podiumHTML + listHTML;
 
     // Update label
     const d2 = new Date();
@@ -2932,4 +3312,4 @@ canvas.addEventListener("touchmove",(e)=>{
 
 </script>
 </body>
-    </html>
+</html>
